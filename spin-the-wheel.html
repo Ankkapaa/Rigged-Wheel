@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spin the Wheel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #0d0d0f;
+    --surface: #161619;
+    --border: #2a2a2f;
+    --accent: #f0c040;
+    --text: #f0ece4;
+    --muted: #6b6b78;
+    --green: #4ade80;
+    --red: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+    background-image: radial-gradient(ellipse at 20% 20%, rgba(240,192,64,0.04) 0%, transparent 50%),
+                      radial-gradient(ellipse at 80% 80%, rgba(224,90,43,0.04) 0%, transparent 50%);
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(240,192,64,0.3);
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .layout {
+    display: flex;
+    gap: 28px;
+    width: 100%;
+    max-width: 980px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .wheel-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 440px;
+  }
+  .wheel-wrap {
+    position: relative;
+    width: min(400px, 90vw);
+    height: min(400px, 90vw);
+  }
+  #wheelCanvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0 60px rgba(240,192,64,0.15), 0 0 0 3px var(--border);
+  }
+  .wheel-wrap { overflow: visible; }
+  @keyframes fastSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .fast-spin { animation: fastSpin 140ms linear infinite; transform-origin: 50% 50%; }
+
+  @keyframes flyRight { to { transform: translateX(110vw) rotate(1080deg); opacity: 1; } }
+  .fly-right { animation: flyRight 900ms cubic-bezier(.12,.9,.25,1) forwards; transform-origin: 50% 50%; }
+
+  @keyframes returnIn { from { transform: translateX(-120vw) rotate(-720deg); } to { transform: translateX(0) rotate(0deg); } }
+  .return-in { animation: returnIn 1400ms cubic-bezier(.2,.8,.2,1) forwards; transform-origin: 50% 50%; }
+
+  .mystery {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4.2rem;
+    color: var(--muted);
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 240ms ease;
+    pointer-events: none;
+  }
+  #wheelCanvas { position: relative; z-index: 5; }
+  .pointer {
+    position: absolute;
+    top: -18px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 32px solid var(--accent);
+    filter: drop-shadow(0 2px 8px rgba(240,192,64,0.7));
+    z-index: 10;
+  }
+  .spin-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.1em;
+    background: var(--accent);
+    color: #0d0d0f;
+    border: none;
+    padding: 14px 56px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 300px;
+    transition: transform 0.12s, box-shadow 0.12s;
+    box-shadow: 0 4px 24px rgba(240,192,64,0.3);
+    touch-action: manipulation;
+  }
+  .spin-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(240,192,64,0.45); }
+  .spin-btn:active { transform: translateY(1px); }
+  .spin-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .result-banner {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    text-align: center;
+    width: 100%;
+    transition: all 0.3s;
+    color: var(--muted);
+  }
+  .result-banner.win { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 20px rgba(240,192,64,0.2); }
+  .result-banner.win { animation: bannerPop 720ms cubic-bezier(.2,.9,.3,1); }
+  .result-banner.spinning { animation: bannerPop 720ms cubic-bezier(.2,.9,.3,1); }
+  @keyframes bannerPop {
+    0% { transform: translateY(10px) scale(0.98); opacity: 0; box-shadow: 0 0 0 rgba(240,192,64,0); }
+    60% { transform: translateY(-6px) scale(1.03); opacity: 1; box-shadow: 0 14px 40px rgba(240,192,64,0.12); }
+    100% { transform: translateY(0) scale(1); opacity: 1; box-shadow: 0 8px 30px rgba(240,192,64,0.08); }
+  }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 300px;
+    flex-shrink: 0;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+  }
+  .rig-small-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .rig-small-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .card-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+  }
+  .card-body { padding: 0 18px 16px; }
+
+  .col-labels {
+    display: grid;
+    grid-template-columns: 1fr 56px 48px 36px;
+    gap: 6px;
+    margin-bottom: 5px;
+  }
+  .col-labels span {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .entry-row {
+    display: grid;
+    grid-template-columns: 1fr 56px 48px 36px;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .entry-row input[type="text"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .entry-row input[type="text"]:focus { border-color: var(--accent); }
+  .del-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.1s, border-color 0.1s;
+    touch-action: manipulation;
+  }
+  .del-btn:hover { color: var(--red); border-color: var(--red); }
+  .add-btn {
+    background: none;
+    border: 1px dashed var(--border);
+    border-radius: 5px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 7px;
+    width: 100%;
+    text-align: center;
+    transition: color 0.15s, border-color 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+    touch-action: manipulation;
+  }
+  .add-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  .history-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  .history-list li {
+    font-size: 0.78rem;
+    color: var(--muted);
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--bg);
+    display: flex;
+    justify-content: space-between;
+  }
+  .history-list li span.winner { color: var(--accent); font-weight: 600; }
+  .history-list::-webkit-scrollbar { width: 4px; }
+  .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ---- MODALS (shared base) ---- */
+  .modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (min-width: 520px) {
+    .modal-backdrop { align-items: center; }
+  }
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px 18px 0 0;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    width: 100%;
+    max-width: 460px;
+    max-height: 85vh;
+    overflow-y: auto;
+    overflow-x: hidden; /* prevent horizontal scroll */
+    box-shadow: 0 -12px 60px rgba(0,0,0,0.6);
+    position: relative;
+    /* ensure content never overflows horizontally */
+    word-break: break-word;
+  }
+  @media (min-width: 520px) {
+    .modal {
+      border-radius: 14px;
+      padding: 28px 24px;
+      max-height: 90vh;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+  }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    margin: 0 auto 20px;
+    display: block;
+  }
+  @media (min-width: 520px) { .modal-handle { display: none; } }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .modal-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 22px;
+  }
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 16px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.15s;
+    touch-action: manipulation;
+    padding: 4px;
+    z-index: 5;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .rig-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 12px;
+    flex-wrap: wrap; /* allow wrapping on narrow screens */
+    min-width: 0; /* prevent flex overflow */
+  }
+  .rig-label { font-size: 0.82rem; color: var(--text); line-height: 1.3; flex: 1; min-width: 0; }
+  .rig-label small { display: block; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+  .toggle {
+    position: relative;
+    width: 44px; height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle input:checked + .toggle-track { background: var(--accent); }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+  }
+  .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+
+  .rig-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    padding: 6px 8px;
+    outline: none;
+    flex: 1;
+    max-width: 160px;
+    min-width: 0;
+  }
+
+  /* number input in modal */
+  .modal-number-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    width: 90px;
+    outline: none;
+    flex-shrink: 0;
+  }
+  .modal-number-input:focus { border-color: var(--accent); }
+
+  .modal-textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    resize: vertical;
+    outline: none;
+    min-height: 70px;
+  }
+  .modal-textarea:focus { border-color: var(--accent); }
+
+  .exclude-list { display:flex; flex-direction:column; gap:6px; width: 100%; }
+  .exclude-item { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text); }
+  .exclude-item input[type="checkbox"] { width:18px; height:18px; accent-color: var(--accent); flex-shrink: 0; }
+  .exclude-item { background: var(--bg); border: 1px solid var(--border); padding: 6px 8px; border-radius: 8px; }
+  .rig-row.disabled .exclude-item { color: rgba(240,236,228,0.35); }
+  .exclude-item input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .weight-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+    table-layout: fixed; /* prevent table from expanding beyond container */
+  }
+  .weight-table th {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-weight: 700;
+    text-align: left;
+    padding: 0 6px 8px;
+    overflow: hidden;
+  }
+  .weight-table th:last-child { text-align: center; }
+  .weight-table td { padding: 4px 6px; overflow: hidden; }
+  .w-name { font-size: 0.82rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .w-input, .fw-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 5px 6px;
+    width: 100%;
+    text-align: center;
+    outline: none;
+  }
+  .w-input:focus, .fw-input:focus { border-color: var(--accent); }
+  .fw-input:disabled, .w-input:disabled { opacity: 0.6; cursor: not-allowed; color: rgba(240,236,228,0.35); }
+
+  /* column widths for weight table */
+  .weight-table colgroup col:nth-child(1) { width: auto; }
+  .weight-table colgroup col:nth-child(2) { width: 72px; }
+  .weight-table colgroup col:nth-child(3) { width: 80px; }
+
+  .rig-row.disabled .rig-label { color: rgba(240,236,228,0.35); }
+  .rig-row.disabled .rig-label small { color: rgba(240,236,228,0.35); }
+  .rig-row.disabled .toggle { opacity: 0.85; }
+  .rig-row.disabled .toggle-track { background: var(--border); cursor: not-allowed; }
+  .rig-row.disabled .toggle-track::after { background: rgba(240,236,228,0.35); }
+  .rig-row.disabled .toggle input { pointer-events: none; }
+
+  .fw-input::placeholder { color: var(--muted); opacity: 1; }
+  .weight-table.fake-enabled .fw-input::placeholder { color: var(--accent); opacity: 1; }
+
+  .entry-row input[type="text"]:disabled { color: rgba(240,236,228,0.35); background: var(--bg); border-color: var(--border); cursor: not-allowed; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 18px 0;
+  }
+  .subhead {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 700px) {
+    .sidebar { width: 100%; max-width: 440px; }
+    .layout { gap: 20px; }
+  }
+
+  /* ---- CONFETTI CANVAS ---- */
+  #confettiCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 200;
+  }
+
+  /* ---- WINNER POPUP ---- */
+  .winner-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .winner-backdrop.show { display: flex; animation: backdropFade 260ms ease both; }
+  @keyframes backdropFade { from { background: rgba(0,0,0,0); } to { background: rgba(0,0,0,0.75); } }
+
+  .winner-popup {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px 36px;
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 32px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(240,192,64,0.15);
+    animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.6) translateY(40px); opacity: 0; }
+    to   { transform: scale(1) translateY(0);      opacity: 1; }
+  }
+
+  .winner-trophy {
+    font-size: 4rem;
+    line-height: 1;
+    margin-bottom: 12px;
+    animation: trophyBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+    display: block;
+  }
+  @keyframes trophyBounce {
+    from { transform: scale(0) rotate(-20deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+  }
+
+  .winner-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .winner-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 10vw, 3.6rem);
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(240,192,64,0.5);
+    line-height: 1.05;
+    margin-bottom: 28px;
+    animation: nameReveal 0.5s ease 0.35s both;
+    word-break: break-word;
+  }
+  @keyframes nameReveal {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .winner-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .winner-close, .winner-spinagain, .winner-remove {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.1em;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    touch-action: manipulation;
+    animation: nameReveal 0.4s ease 0.5s both;
+  }
+  .winner-close {
+    background: var(--accent);
+    color: #0d0d0f;
+    box-shadow: 0 4px 20px rgba(240,192,64,0.35);
+  }
+  .winner-close:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(240,192,64,0.5); }
+  .winner-spinagain {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border) !important;
+  }
+  .winner-spinagain:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
+  .winner-remove {
+    background: rgba(248,113,113,0.15);
+    color: var(--red);
+    border: 1px solid rgba(248,113,113,0.35) !important;
+  }
+  .winner-remove:hover { background: rgba(248,113,113,0.25); transform: translateY(-2px); }
+
+  .winner-popup::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: conic-gradient(from 0deg, #f0c040, #e05a2b, #4a7fe8, #c44b8a, #2fbf8a, #f0c040);
+    z-index: -1;
+    opacity: 0;
+    animation: ringPulse 2s ease 0.3s infinite;
+  }
+  @keyframes ringPulse {
+    0%, 100% { opacity: 0; transform: scale(1); }
+    50%       { opacity: 0.6; transform: scale(1.01); }
+  }
+
+  /* flash title/subtitle white in sync with the ring pulse */
+  @keyframes labelFlash {
+    0%, 100% { color: var(--muted); }
+    50%       { color: #fff; }
+  }
+  @keyframes subtitleFlash {
+    0%, 100% { color: var(--muted); }
+    50%       { color: rgba(255,255,255,0.75); }
+  }
+  .winner-popup .winner-label {
+    animation: labelFlash 2s ease 0.3s infinite;
+  }
+  .winner-popup .winner-custom-msg {
+    animation: subtitleFlash 2s ease 0.3s infinite;
+  }
+
+  /* winner removal animation */
+  @keyframes entryRemoveAnim {
+    0%   { transform: translateX(0) scaleY(1); opacity: 1; max-height: 60px; margin-bottom: 8px; }
+    40%  { transform: translateX(12px) scaleY(0.9); opacity: 0.6; }
+    70%  { transform: translateX(-8px) scaleY(0.7); opacity: 0.3; max-height: 60px; margin-bottom: 8px; }
+    100% { transform: translateX(60px) scaleY(0); opacity: 0; max-height: 0; margin-bottom: 0; padding: 0; }
+  }
+  .entry-row.removing {
+    animation: entryRemoveAnim 480ms cubic-bezier(.4,0,.2,1) forwards;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .winner-popup.closing { animation: popupClose 420ms cubic-bezier(.2,.9,.3,1) forwards; }
+  @keyframes popupClose {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(28px) scale(0.86); }
+  }
+
+  /* fake entry time input */
+  input[type="time"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    padding: 6px 8px;
+    outline: none;
+    color-scheme: dark;
+  }
+
+  /* inline text input in modal rows */
+  .modal-text-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    padding: 6px 8px;
+    outline: none;
+    min-width: 0;
+  }
+  .modal-text-input:focus { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<h1 data-i18n="home.title">SPIN THE WHEEL</h1>
+<p class="subtitle" id="subtitleTrigger" data-i18n="home.subtitle">by Ankanpää</p>
+
+<div style="margin-bottom:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+  <div style="color:var(--muted);font-size:0.78rem;" data-i18n="modal.language">Language</div>
+  <select id="langSelect" class="rig-select" style="max-width:140px;">
+    <option value="en">English</option>
+    <option value="fi">Suomi</option>
+  </select>
+  <button id="saveHomeBtn" class="rig-small-btn" style="margin-left:8px;">Save</button>
+  <button id="loadHomeBtn" class="rig-small-btn">Load</button>
+  <button id="customizeBtn" class="rig-small-btn">Customize</button>
+</div>
+
+<div class="layout">
+  <div class="wheel-area">
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <div id="mysteryMark" class="mystery">?</div>
+      <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    </div>
+    <button class="spin-btn" id="spinBtn" data-i18n="home.spin">SPIN</button>
+    <div class="result-banner" id="resultBanner" data-i18n="home.resultBanner">Spin to reveal the winner!</div>
+  </div>
+
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" data-i18n="entries.title">Entries</span>
+      </div>
+      <div class="card-body">
+        <div class="col-labels"><span data-i18n="entries.name">Name</span><span data-i18n="entries.weight">Weight</span><span data-i18n="entries.color">Color</span><span></span></div>
+        <div id="entriesList"></div>
+        <button class="add-btn" id="addBtn" data-i18n="entries.add">+ Add entry</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" data-i18n="history.title">Results History</span>
+      </div>
+      <div class="card-body">
+        <ul class="history-list" id="historyList">
+          <li id="historyPlaceholder" data-i18n="history.noSpins" style="color:var(--muted);font-style:italic;font-size:0.75rem;background:none;">No spins yet</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<canvas id="confettiCanvas"></canvas>
+
+<!-- WINNER POPUP -->
+<div class="winner-backdrop" id="winnerBackdrop">
+  <div class="winner-popup">
+    <span class="winner-trophy">🏆</span>
+    <div class="winner-label" id="winnerTitle">We have a winner!</div>
+    <div class="winner-custom-msg" id="winnerSubtitle" style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">&nbsp;</div>
+    <div class="winner-name" id="winnerName">—</div>
+    <div class="winner-actions">
+      <button class="winner-close" id="winnerClose" data-i18n="winner.awesome">Awesome!</button>
+      <button class="winner-remove" id="winnerRemoveBtn">Remove</button>
+      <button class="winner-spinagain" id="winnerSpinAgain" data-i18n="winner.spinAgain">Spin again</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMIZE MODAL -->
+<div class="modal-backdrop" id="customizeModal">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <button class="modal-close" id="customClose">✕</button>
+    <div class="modal-title">Customize</div>
+    <div class="modal-sub">Spin behaviour &amp; popup options</div>
+
+    <div class="subhead">Spin</div>
+    <div class="rig-row">
+      <div class="rig-label">Spin time<small>Duration in seconds</small></div>
+      <input id="spinTimeInput" type="number" min="0.5" step="0.1" value="4" class="modal-number-input">
+    </div>
+    <div class="rig-row">
+      <div class="rig-label">Ticking sound<small>Play ticking during the spin</small></div>
+      <label class="toggle"><input type="checkbox" id="tickDuringSpin"><div class="toggle-track"></div></label>
+    </div>
+
+    <hr class="divider">
+    <div class="subhead">Winner Popup</div>
+    <div class="rig-row">
+      <div class="rig-label">Auto-remove winner<small>Remove from entries after winning</small></div>
+      <label class="toggle"><input type="checkbox" id="autoRemoveWinner"><div class="toggle-track"></div></label>
+    </div>
+    <div class="rig-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
+      <div class="rig-label">Popup title<small>Big header text (e.g. "We have a winner!")</small></div>
+      <input id="popupTitleInput" type="text" class="modal-text-input" style="width:100%;" value="We have a winner!">
+    </div>
+    <div class="rig-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
+      <div class="rig-label">Popup subtitle<small>Smaller line below title. Use {name} for winner's name</small></div>
+      <input id="popupSubtitleInput" type="text" class="modal-text-input" style="width:100%;" value="🎉 Congratulations!">
+    </div>
+    <div class="rig-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
+      <div class="rig-label">Winner name text<small>The big yellow text. Use {name} or any fixed text</small></div>
+      <input id="popupNameInput" type="text" class="modal-text-input" style="width:100%;" value="{name}">
+    </div>
+
+    <hr class="divider">
+    <div style="display:flex;gap:8px;">
+      <button id="saveCustomizeBtn" class="rig-small-btn" style="padding:8px 16px;">Save</button>
+      <button id="cancelCustomizeBtn" class="rig-small-btn" style="padding:8px 16px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECRET RIGGING MODAL -->
+<div class="modal-backdrop" id="rigModal">
+  <div class="modal" id="modalInner">
+    <span class="modal-handle"></span>
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-title" data-i18n="modal.title">⚙ Rigging Settings</div>
+    <div class="modal-sub" data-i18n="modal.sub">Secret panel ;)</div>
+
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <button id="saveRigBtn" class="rig-small-btn">Save rig</button>
+      <button id="loadRigBtn" class="rig-small-btn">Load rig</button>
+    </div>
+
+    <div class="subhead" data-i18n="subhead.weights">Hidden Weights</div>
+    <div class="rig-row">
+      <div class="rig-label" data-i18n="label.useWeights">Use weights<small data-i18n="label.useWeights.small">Higher = more likely to win</small></div>
+      <label class="toggle">
+        <input type="checkbox" id="useWeights" checked>
+        <div class="toggle-track"></div>
+      </label>
+    </div>
+    <div class="rig-row">
+      <div class="rig-label" data-i18n="label.displayWeights">Display weighted slices<small data-i18n="label.displayWeights.small">Show slices proportional to weights</small></div>
+      <label class="toggle">
+        <input type="checkbox" id="displayWeighted">
+        <div class="toggle-track"></div>
+      </label>
+    </div>
+    <div class="rig-row">
+      <div class="rig-label" data-i18n="label.showFakeWeights">Show fake weights<small data-i18n="label.showFakeWeights.small">Visual only — does not affect winner selection</small></div>
+      <label class="toggle">
+        <input type="checkbox" id="showFakeWeights">
+        <div class="toggle-track"></div>
+      </label>
+    </div>
+    <div style="overflow-x:hidden;width:100%;">
+      <table class="weight-table">
+        <colgroup><col><col style="width:72px"><col style="width:80px"></colgroup>
+        <thead><tr><th data-i18n="entries.name">Name</th><th data-i18n="entries.weight">Weight</th><th data-i18n="entries.fakeWeight">Fake wt.</th></tr></thead>
+        <tbody id="weightBody"></tbody>
+      </table>
+    </div>
+
+    <hr class="divider">
+    <div class="subhead" data-i18n="subhead.override">Override Controls</div>
+
+    <div class="rig-row">
+      <div class="rig-label" data-i18n="label.forceWinner">Force winner<small data-i18n="label.forceWinner.small">Always pick this person</small></div>
+      <label class="toggle">
+        <input type="checkbox" id="useForce">
+        <div class="toggle-track"></div>
+      </label>
+    </div>
+    <div class="rig-row" id="forcePickRow" style="opacity:0.35;pointer-events:none;">
+      <div class="rig-label" data-i18n="label.forcedWinner">Forced winner</div>
+      <select class="rig-select" id="forcePick"></select>
+    </div>
+
+    <div class="rig-row">
+      <div class="rig-label" data-i18n="label.exclude">Exclude from winning<small data-i18n="label.exclude.small">These people can never win</small></div>
+      <label class="toggle">
+        <input type="checkbox" id="useExclude">
+        <div class="toggle-track"></div>
+      </label>
+    </div>
+    <div class="rig-row" id="excludePickRow" style="opacity:0.35;pointer-events:none;flex-direction:column;align-items:flex-start;">
+      <div class="rig-label" data-i18n="label.excludedPerson" style="margin-bottom:6px;">Excluded persons</div>
+      <div id="excludeList" class="exclude-list"></div>
+    </div>
+
+    <hr class="divider">
+    <div class="subhead">History</div>
+    <div class="rig-row">
+      <div class="rig-label" data-i18n="label.resultsHistory">Results history</div>
+      <button class="add-btn" id="clearHistoryBtn" style="border-style:solid;border-color:var(--red);color:var(--red);max-width:130px;">Clear History</button>
+    </div>
+    <div class="rig-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+      <div class="rig-label" data-i18n="label.addFakeEntry">Add fake entry<small data-i18n="label.addFakeEntry.small">Insert a manual history item</small></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%;">
+        <input id="fakeName" type="text" placeholder="Name" class="modal-text-input" style="flex:1;min-width:80px;">
+        <input id="fakeTime" type="time" style="width:100px;flex-shrink:0;">
+        <button class="add-btn" id="addFakeBtn" style="padding:6px 12px;max-width:80px;border-style:solid;">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let entries = [
+  { name: "Alice",  weight: 1 },
+  { name: "Bob",    weight: 1 },
+  { name: "Carol",  weight: 1 },
+  { name: "Dave",   weight: 1 },
+  { name: "Eve",    weight: 1 },
+];
+
+// --- Settings ---
+let settings = {
+  spinTime: 4,
+  tickDuringSpin: false,
+  popupTitle: 'We have a winner!',
+  popupSubtitle: '🎉 Congratulations!',
+  popupNameText: '{name}',
+  autoRemoveWinner: false
+};
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem('wheel.settings');
+    if (raw) settings = Object.assign(settings, JSON.parse(raw));
+  } catch (err) {}
+  applySettingsToUI();
+}
+
+function applySettingsToUI() {
+  const sti = document.getElementById('spinTimeInput'); if (sti) sti.value = settings.spinTime;
+  const tchk = document.getElementById('tickDuringSpin'); if (tchk) tchk.checked = !!settings.tickDuringSpin;
+  const pti = document.getElementById('popupTitleInput'); if (pti) pti.value = settings.popupTitle;
+  const psi = document.getElementById('popupSubtitleInput'); if (psi) psi.value = settings.popupSubtitle;
+  const pni = document.getElementById('popupNameInput'); if (pni) pni.value = settings.popupNameText;
+  const ar = document.getElementById('autoRemoveWinner'); if (ar) ar.checked = !!settings.autoRemoveWinner;
+}
+
+function saveSettings() {
+  try {
+    const sti = document.getElementById('spinTimeInput'); if (sti) settings.spinTime = Math.max(0.2, parseFloat(sti.value) || 4);
+    const tchk = document.getElementById('tickDuringSpin'); if (tchk) settings.tickDuringSpin = !!tchk.checked;
+    const pti = document.getElementById('popupTitleInput'); if (pti) settings.popupTitle = pti.value || settings.popupTitle;
+    const psi = document.getElementById('popupSubtitleInput'); if (psi) settings.popupSubtitle = psi.value;
+    const pni = document.getElementById('popupNameInput'); if (pni) settings.popupNameText = pni.value || settings.popupNameText;
+    const ar = document.getElementById('autoRemoveWinner'); if (ar) settings.autoRemoveWinner = !!ar.checked;
+    localStorage.setItem('wheel.settings', JSON.stringify(settings));
+  } catch (err) { alert('Error: Failed to save settings.'); }
+}
+
+// ---- Audio ticking ----
+let audioCtx = null, tickIntervalId = null;
+function playTick() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'square'; o.frequency.value = 880;
+    g.gain.value = 0.0001;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now);
+    g.gain.exponentialRampToValueAtTime(0.12, now + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.00001, now + 0.06);
+    o.stop(now + 0.07);
+  } catch (e) {}
+}
+// boundary-aware ticking: fires playTick() each time the pointer crosses a slice line
+let lastTickSector = -1;
+function updateTickForAngle(angle) {
+  if (!settings.tickDuringSpin) return;
+  const n = entries.length; if (n < 2) return;
+  const { cumulative } = computeSliceAngles();
+  // normalize angle to [0, 2PI)
+  const TWO_PI = Math.PI * 2;
+  // pointer is at -PI/2; find which sector the pointer sits in
+  const pointerAngle = (-Math.PI / 2 - angle % TWO_PI + TWO_PI * 10) % TWO_PI;
+  let sector = 0;
+  for (let i = n - 1; i >= 0; i--) {
+    if (pointerAngle >= cumulative[i]) { sector = i; break; }
+  }
+  if (sector !== lastTickSector) {
+    if (lastTickSector !== -1) playTick(); // don't tick on the very first frame
+    lastTickSector = sector;
+  }
+}
+function startTicking() { lastTickSector = -1; }
+function stopTicking() { if (tickIntervalId) { clearInterval(tickIntervalId); tickIntervalId = null; } }
+
+// --- Translations ---
+const TRANSLATIONS = {
+  en: {
+    'home.title': 'Spin the Wheel', 'home.subtitle': 'by Ankanpää',
+    'home.spin': 'Spin', 'home.resultBanner': 'Spin to reveal the winner!',
+    'home.spinning': '🎰 Spinning...', 'home.winner': '🏆 {name} wins!',
+    'entries.title': 'Entries', 'entries.weight': 'Weight', 'entries.fakeWeight': 'Fake wt.',
+    'entries.color': 'Color', 'entries.add': '+ Add entry', 'entries.name': 'Name', 'entries.placeholder': 'Name',
+    'history.title': 'History', 'history.noSpins': 'No spins yet',
+    'modal.title': '⚙ Rigging Settings', 'modal.sub': 'Secret panel :)', 'modal.language': 'Language',
+    'subhead.weights': 'Weights', 'subhead.override': 'Override Controls',
+    'label.useWeights': 'Use weights', 'label.useWeights.small': 'Higher = more likely to win',
+    'label.displayWeights': 'Display weighted slices', 'label.displayWeights.small': 'Show slices proportional to weights',
+    'label.showFakeWeights': 'Show fake weights', 'label.showFakeWeights.small': 'Visual only — does not affect winner selection',
+    'label.forceWinner': 'Force winner', 'label.forceWinner.small': 'Always pick this person',
+    'label.forcedWinner': 'Forced winner', 'label.exclude': 'Exclude from winning',
+    'label.exclude.small': 'These people can never win', 'label.excludedPerson': 'Excluded persons',
+    'label.resultsHistory': 'Results history', 'label.addFakeEntry': 'Add fake entry',
+    'label.addFakeEntry.small': 'Insert a manual history item',
+    'winner.title': 'We have a winner!', 'winner.awesome': 'Awesome!', 'winner.spinAgain': 'Spin again',
+    'confirm.clearHistory': 'Clear all spin history? This cannot be undone.',
+    'error.enterName': 'Enter a name for the fake entry',
+    'color.pick': 'Pick color', 'btn.remove': 'Remove', 'btn.save': 'Save', 'btn.load': 'Load', 'btn.add': 'Add',
+    'btn.clearHistory': 'Clear History'
+  },
+  fi: {
+    'home.title': 'Spin the Wheel', 'home.subtitle': 'by Ankanpää',
+    'home.spin': 'Pyöräytä', 'home.resultBanner': 'Pyöräytä voittajan paljastamiseksi!',
+    'home.spinning': '🎰 Pyöräytetään...', 'home.winner': '🏆 {name} voitti!',
+    'entries.title': 'Osallistujat', 'entries.weight': 'Paino', 'entries.fakeWeight': 'Valepaino',
+    'entries.color': 'Väri', 'entries.add': '+ Lisää osallistuja', 'entries.name': 'Nimi', 'entries.placeholder': 'Nimi',
+    'history.title': 'Historia', 'history.noSpins': 'Ei pyöräytyksiä',
+    'modal.title': '⚙ Riggausasetukset', 'modal.sub': 'Salainen paneeli :)', 'modal.language': 'Kieli',
+    'subhead.weights': 'Painot', 'subhead.override': 'Ohitusasetukset',
+    'label.useWeights': 'Käytä painoja', 'label.useWeights.small': 'Suurempi = suurempi todennäköisyys voittaa',
+    'label.displayWeights': 'Näytä painotetut osat', 'label.displayWeights.small': 'Näytä osat painojen mukaisesti',
+    'label.showFakeWeights': 'Näytä valepainot', 'label.showFakeWeights.small': 'Vain visuaalinen — ei vaikuta voittajan valintaan',
+    'label.forceWinner': 'Pakota voittaja', 'label.forceWinner.small': 'Tämä henkilö voittaa aina',
+    'label.forcedWinner': 'Pakotettu voittaja', 'label.exclude': 'Ei voi voittaa',
+    'label.exclude.small': 'Nämä henkilöt eivät voi voittaa', 'label.excludedPerson': 'Poissuljetut henkilöt',
+    'label.resultsHistory': 'Tuloshistoria', 'label.addFakeEntry': 'Lisää valemerkintä',
+    'label.addFakeEntry.small': 'Lisää manuaalinen Historia-merkintä',
+    'winner.title': 'Meillä on voittaja!', 'winner.awesome': 'Mahtavaa!', 'winner.spinAgain': 'Pyöräytä uudelleen',
+    'confirm.clearHistory': 'Tyhjennä pyöräytyshistoria? Tätä ei voi peruuttaa.',
+    'error.enterName': 'Syötä nimi valemerkinnälle',
+    'color.pick': 'Valitse väri', 'btn.remove': 'Poista', 'btn.save': 'Tallenna', 'btn.load': 'Lataa', 'btn.add': 'Lisää',
+    'btn.clearHistory': 'Tyhjennä historia'
+  }
+};
+let currentLang = 'en';
+function t(key) { return (TRANSLATIONS[currentLang]||{})[key] || (TRANSLATIONS['en']||{})[key] || key; }
+function localize() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n'); if (!key) return;
+    const hasChildTrans = el.querySelector('[data-i18n]') && el.querySelector('[data-i18n]') !== el;
+    if (hasChildTrans) { const f = el.firstChild; if (f && f.nodeType === Node.TEXT_NODE) f.nodeValue = t(key); }
+    else el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const k = el.getAttribute('data-i18n-placeholder'); if (k) el.placeholder = t(k); });
+  document.title = t('home.title');
+  const ph = document.getElementById('historyPlaceholder'); if (ph) ph.textContent = t('history.noSpins');
+}
+function setLanguage(lang) { currentLang = lang in TRANSLATIONS ? lang : 'en'; localize(); }
+
+// ---- Save/Load ----
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function downloadJSON(filename, obj) {
+  try {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  } catch (e) {}
+}
+
+function saveHome() {
+  try {
+    const payload = { entries: entries.map(e => ({ name: e.name, color: e.color })), lang: currentLang, history: spinHistory || [] };
+    localStorage.setItem('wheel.home', JSON.stringify(payload));
+    downloadJSON(`wheel-home-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`, payload);
+    alert(t('btn.save') + ' ✓');
+  } catch (e) { alert('Save failed'); }
+}
+
+function loadHome() {
+  try {
+    const raw = localStorage.getItem('wheel.home');
+    if (!raw) { alert('No saved home data'); return; }
+    applyHomeData(JSON.parse(raw));
+    alert(t('btn.load') + ' ✓');
+  } catch (e) { alert('Load failed'); }
+}
+
+function applyHomeData(data) {
+  if (Array.isArray(data.entries)) entries = data.entries.map(e => ({ name: e.name || 'Entry', weight: 1, color: e.color || null }));
+  if (data.lang) setLanguage(data.lang);
+  spinHistory = Array.isArray(data.history) ? data.history : [];
+  renderEntries(); renderWeightTable(); refreshSelects(); drawWheel();
+  const list = document.getElementById('historyList');
+  if (list) list.innerHTML = spinHistory.length ? spinHistory.map(h => `<li><span class="winner">${escHtml(h.name)}</span><span>${escHtml(h.time)}</span></li>`).join('') : `<li id="historyPlaceholder" style="color:var(--muted);font-style:italic;font-size:0.75rem;background:none;">${t('history.noSpins')}</li>`;
+}
+
+function saveRig() {
+  try {
+    const payload = {
+      useWeights: !!document.getElementById('useWeights')?.checked,
+      displayWeighted: !!document.getElementById('displayWeighted')?.checked,
+      showFakeWeights: !!document.getElementById('showFakeWeights')?.checked,
+      useExclude: !!document.getElementById('useExclude')?.checked,
+      useForce: !!document.getElementById('useForce')?.checked,
+      forcePick: parseInt(document.getElementById('forcePick')?.value || '0', 10),
+      entries: entries.map(e => ({ weight: e.weight, fakeWeight: e.fakeWeight }))
+    };
+    localStorage.setItem('wheel.rig', JSON.stringify(payload));
+    downloadJSON(`wheel-rig-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`, payload);
+    alert(t('btn.save') + ' ✓');
+  } catch (e) { alert('Save failed'); }
+}
+
+function applyRigData(data) {
+  if (data.useWeights !== undefined) document.getElementById('useWeights').checked = !!data.useWeights;
+  if (data.displayWeighted !== undefined) document.getElementById('displayWeighted').checked = !!data.displayWeighted;
+  if (data.showFakeWeights !== undefined) document.getElementById('showFakeWeights').checked = !!data.showFakeWeights;
+  if (data.useExclude !== undefined) document.getElementById('useExclude').checked = !!data.useExclude;
+  if (data.useForce !== undefined) document.getElementById('useForce').checked = !!data.useForce;
+  if (!isNaN(data.forcePick)) document.getElementById('forcePick').value = String(data.forcePick);
+  if (Array.isArray(data.entries)) {
+    for (let i = 0; i < data.entries.length && i < entries.length; i++) {
+      if (data.entries[i].weight !== undefined) entries[i].weight = data.entries[i].weight;
+      if (data.entries[i].fakeWeight !== undefined) entries[i].fakeWeight = data.entries[i].fakeWeight;
+    }
+  }
+  renderWeightTable(); renderEntries(); drawWheel(); refreshSelects();
+}
+
+function promptLoadRig() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json';
+  inp.addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => { try { const d = JSON.parse(ev.target.result); localStorage.setItem('wheel.rig', JSON.stringify(d)); applyRigData(d); alert(t('btn.load') + ' ✓'); } catch (e) { alert('Invalid file'); } };
+    r.readAsText(f);
+  });
+  inp.click();
+}
+
+const COLORS = ["#e05a2b","#f0c040","#4a7fe8","#c44b8a","#2fbf8a","#e8734a","#8b5cf6","#06b6d4","#f43f5e","#84cc16"];
+
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+let currentAngle = 0, spinning = false, spinHistory = [];
+let lastWinnerIdx = -1; // track for remove button
+
+// ---- Modals ----
+document.getElementById('subtitleTrigger').addEventListener('click', () => toggleModal('rigModal'));
+document.getElementById('customizeBtn').addEventListener('click', () => { applySettingsToUI(); toggleModal('customizeModal'); });
+
+let keySeq = '';
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'Escape') { closeAllModals(); return; }
+  keySeq += e.key.toLowerCase();
+  if (keySeq.length > 3) keySeq = keySeq.slice(-3);
+  if (keySeq === 'rig') { keySeq = ''; toggleModal('rigModal'); }
+});
+
+document.getElementById('modalClose').addEventListener('click', () => closeModal('rigModal'));
+document.getElementById('rigModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('rigModal'); });
+document.getElementById('customClose').addEventListener('click', () => closeModal('customizeModal'));
+document.getElementById('customizeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('customizeModal'); });
+document.getElementById('saveCustomizeBtn').addEventListener('click', () => { saveSettings(); applySettingsToUI(); closeModal('customizeModal'); });
+document.getElementById('cancelCustomizeBtn').addEventListener('click', () => closeModal('customizeModal'));
+
+function toggleModal(id) { const m = document.getElementById(id); const opening = !m.classList.contains('open'); closeAllModals(); if (opening) { m.classList.add('open'); if (id === 'rigModal') renderWeightTable(); } }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeAllModals() { document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open')); }
+
+// ---- Rig toggles ----
+document.getElementById('useForce').addEventListener('change', function() {
+  const row = document.getElementById('forcePickRow');
+  row.style.opacity = this.checked ? '1' : '0.35';
+  row.style.pointerEvents = this.checked ? 'auto' : 'none';
+  const useExcludeChk = document.getElementById('useExclude');
+  const excludeRow = document.getElementById('excludePickRow');
+  if (useExcludeChk && excludeRow) {
+    if (this.checked) {
+      useExcludeChk.checked = false; useExcludeChk.disabled = true;
+      excludeRow.classList.add('disabled'); excludeRow.style.opacity = '0.35'; excludeRow.style.pointerEvents = 'none';
+    } else {
+      useExcludeChk.disabled = false;
+      excludeRow.classList.toggle('disabled', !useExcludeChk.checked);
+      excludeRow.style.opacity = useExcludeChk.checked ? '1' : '0.35';
+      excludeRow.style.pointerEvents = useExcludeChk.checked ? 'auto' : 'none';
+    }
+    try { renderExcludeList(); } catch(e) {}
+  }
+});
+
+document.getElementById('useExclude').addEventListener('change', function() {
+  const row = document.getElementById('excludePickRow');
+  row.style.opacity = this.checked ? '1' : '0.35';
+  row.style.pointerEvents = this.checked ? 'auto' : 'none';
+  row.classList.toggle('disabled', !this.checked);
+  try { renderExcludeList(); } catch(e) {}
+});
+
+const displayWeightedChk = document.getElementById('displayWeighted');
+const showFakeWeightsChk = document.getElementById('showFakeWeights');
+const useWeightsChk = document.getElementById('useWeights');
+
+if (displayWeightedChk) displayWeightedChk.addEventListener('change', () => { drawWheel(); syncWeightToggles(); renderWeightTable(); renderEntries(); });
+if (showFakeWeightsChk) showFakeWeightsChk.addEventListener('change', () => { drawWheel(); syncWeightToggles(); renderWeightTable(); renderEntries(); });
+if (useWeightsChk) useWeightsChk.addEventListener('change', () => { drawWheel(); syncWeightToggles(); renderWeightTable(); renderEntries(); });
+
+function syncWeightToggles() {
+  const useW = useWeightsChk ? useWeightsChk.checked : true;
+  const showFake = showFakeWeightsChk ? showFakeWeightsChk.checked : false;
+  const dispW = displayWeightedChk ? displayWeightedChk.checked : false;
+  if (!useW) {
+    if (displayWeightedChk) { displayWeightedChk.checked = false; displayWeightedChk.disabled = true; const r = displayWeightedChk.closest('.rig-row'); if (r) r.classList.add('disabled'); }
+    if (showFakeWeightsChk) { showFakeWeightsChk.checked = false; showFakeWeightsChk.disabled = true; const r = showFakeWeightsChk.closest('.rig-row'); if (r) r.classList.add('disabled'); }
+  } else if (showFake) {
+    if (displayWeightedChk) { displayWeightedChk.checked = false; displayWeightedChk.disabled = true; const r = displayWeightedChk.closest('.rig-row'); if (r) r.classList.add('disabled'); }
+    if (showFakeWeightsChk) { showFakeWeightsChk.disabled = false; const r = showFakeWeightsChk.closest('.rig-row'); if (r) r.classList.remove('disabled'); }
+  } else {
+    if (displayWeightedChk) { displayWeightedChk.disabled = false; const r = displayWeightedChk.closest('.rig-row'); if (r) r.classList.remove('disabled'); }
+    if (showFakeWeightsChk) { showFakeWeightsChk.disabled = false; const r = showFakeWeightsChk.closest('.rig-row'); if (r) r.classList.remove('disabled'); }
+  }
+}
+
+const langSelect = document.getElementById('langSelect');
+if (langSelect) { langSelect.value = currentLang; langSelect.addEventListener('change', e => setLanguage(e.target.value)); }
+localize();
+loadSettings();
+
+// ---- Weight table ----
+function renderWeightTable() {
+  const tbody = document.getElementById('weightBody');
+  const showFake = showFakeWeightsChk ? showFakeWeightsChk.checked : false;
+  const useWeights = useWeightsChk ? useWeightsChk.checked : true;
+  tbody.innerHTML = entries.map((e, i) => `
+    <tr>
+      <td class="w-name">${escHtml(e.name)}</td>
+      <td><input class="w-input" type="number" value="${e.weight}" min="0.1" step="0.5" data-i="${i}" ${!useWeights ? 'disabled' : ''}></td>
+      <td><input class="fw-input" type="number" value="${e.fakeWeight !== undefined ? e.fakeWeight : ''}" placeholder="1" min="0" step="0.5" data-i="${i}" ${!showFake ? 'disabled' : ''}></td>
+    </tr>
+  `).join('');
+  const table = document.querySelector('.weight-table'); if (table) table.classList.toggle('fake-enabled', showFake);
+  renderExcludeList();
+  tbody.querySelectorAll('.w-input').forEach(inp => inp.addEventListener('input', ev => {
+    entries[+ev.target.dataset.i].weight = Math.max(0.1, parseFloat(ev.target.value) || 0.1); drawWheel(); try { renderEntries(); } catch(e) {}
+  }));
+  tbody.querySelectorAll('.fw-input').forEach(inp => inp.addEventListener('input', ev => {
+    const idx = +ev.target.dataset.i; const raw = (ev.target.value || '').toString().trim();
+    if (raw === '') delete entries[idx].fakeWeight;
+    else { const num = parseFloat(raw); entries[idx].fakeWeight = isFinite(num) ? Math.max(0, num) : 0; }
+    if (showFakeWeightsChk && showFakeWeightsChk.checked) { drawWheel(); try { renderEntries(); } catch(e) {} }
+  }));
+}
+
+function refreshSelects() {
+  const sel = document.getElementById('forcePick'); if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = entries.map((e, i) => `<option value="${i}">${escHtml(e.name)}</option>`).join('');
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+function renderEntries() {
+  const list = document.getElementById('entriesList'); list.innerHTML = '';
+  const showFake = showFakeWeightsChk ? showFakeWeightsChk.checked : false;
+  const displayWeighted = displayWeightedChk ? displayWeightedChk.checked : false;
+  const useWeights = useWeightsChk ? useWeightsChk.checked : true;
+  entries.forEach((e, i) => {
+    const row = document.createElement('div'); row.className = 'entry-row';
+    let labelValue = showFake ? (e.fakeWeight !== undefined ? e.fakeWeight : 1) : displayWeighted ? (Number(e.weight) || 1) : 1;
+    row.innerHTML = `
+      <div><input type="text" value="${escHtml(e.name)}" placeholder="${t('entries.placeholder')}" data-i="${i}" class="name-inp" ${!useWeights ? 'disabled' : ''}></div>
+      <div style="text-align:center"><span data-i="${i}">${escHtml(String(labelValue))}</span></div>
+      <input type="color" value="${e.color || COLORS[i % COLORS.length]}" data-i="${i}" class="color-inp" title="${t('color.pick')}" style="width:36px;height:28px;border-radius:6px;border:1px solid var(--border);padding:0;cursor:pointer;">
+      <button class="del-btn" data-i="${i}" title="${t('btn.remove')}">✕</button>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.name-inp').forEach(inp => inp.addEventListener('input', ev => {
+    entries[+ev.target.dataset.i].name = ev.target.value; drawWheel(); refreshSelects();
+    if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
+  }));
+  list.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', ev => {
+    entries.splice(+ev.target.dataset.i, 1); renderEntries(); drawWheel(); refreshSelects();
+    if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
+  }));
+  list.querySelectorAll('.color-inp').forEach(inp => inp.addEventListener('input', ev => {
+    entries[+ev.target.dataset.i].color = ev.target.value; drawWheel();
+  }));
+}
+
+function renderExcludeList() {
+  const container = document.getElementById('excludeList'); if (!container) return;
+  const useExclude = document.getElementById('useExclude') ? document.getElementById('useExclude').checked : false;
+  container.innerHTML = entries.map((e, i) => `
+    <label class="exclude-item"><input type="checkbox" data-i="${i}" ${e.excluded ? 'checked' : ''} ${!useExclude ? 'disabled' : ''}> ${escHtml(e.name)}</label>
+  `).join('');
+  container.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', ev => {
+    entries[+ev.target.dataset.i].excluded = ev.target.checked;
+  }));
+}
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  entries.push({ name: `Entry ${entries.length + 1}`, weight: 1 });
+  renderEntries(); drawWheel(); refreshSelects();
+  if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
+});
+
+// ---- Draw wheel ----
+function computeSliceAngles(overrideOptions) {
+  const n = entries.length; if (n === 0) return { angles: [], cumulative: [] };
+  const override = overrideOptions || {};
+  let displayWeighted = override.displayWeighted !== undefined ? override.displayWeighted : (displayWeightedChk ? displayWeightedChk.checked : false);
+  const showFake = override.showFake !== undefined ? override.showFake : (showFakeWeightsChk ? showFakeWeightsChk.checked : false);
+  if (showFake) displayWeighted = true;
+  let angles = [];
+  if (displayWeighted) {
+    const useWeights = useWeightsChk ? useWeightsChk.checked : true;
+    let ws = showFake ? entries.map(e => { const v = e.fakeWeight !== undefined ? Number(e.fakeWeight) : 1; return (isFinite(v) && v > 0) ? v : 0; }) : entries.map(e => useWeights ? (Number(e.weight) || 0) : 1);
+    const total = ws.reduce((s, w) => s + (isFinite(w) && w > 0 ? w : 0), 0) || n;
+    angles = ws.map(w => (Math.PI * 2) * (w / total));
+  } else {
+    const a = (Math.PI * 2) / n; angles = Array(n).fill(a);
+  }
+  const cumulative = []; let sum = 0;
+  for (let i = 0; i < angles.length; i++) { cumulative.push(sum); sum += angles[i]; }
+  return { angles, cumulative };
+}
+
+function drawWheel(highlightIndex = -1) {
+  const size = canvas.width, cx = size / 2, cy = size / 2, r = cx - 4;
+  ctx.clearRect(0, 0, size, size);
+  const n = entries.length; if (n === 0) return;
+  const { angles, cumulative } = computeSliceAngles();
+  entries.forEach((e, i) => {
+    const sliceAngle = angles[i] || ((Math.PI * 2) / n);
+    const startA = currentAngle + (cumulative[i] || (i * sliceAngle));
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, startA, startA + sliceAngle); ctx.closePath();
+    ctx.fillStyle = i === highlightIndex ? '#fff' : (e.color || COLORS[i % COLORS.length]);
+    ctx.strokeStyle = '#0d0d0f'; ctx.lineWidth = 2; ctx.fill(); ctx.stroke();
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(startA + sliceAngle / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = i === highlightIndex ? '#0d0d0f' : '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4;
+    const fontSize = Math.max(10, Math.min(16, (sliceAngle * r * 0.7) / (e.name.length * 0.6 + 1)));
+    ctx.font = `700 ${fontSize}px 'DM Sans', sans-serif`;
+    ctx.fillText(e.name.length > 14 ? e.name.slice(0,13)+'…' : e.name, r - 12, 5);
+    ctx.restore();
+  });
+  ctx.beginPath(); ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+  ctx.fillStyle = '#0d0d0f'; ctx.fill(); ctx.strokeStyle = '#f0c040'; ctx.lineWidth = 3; ctx.stroke();
+}
+
+// ---- Pick winner ----
+function pickWinner() {
+  if (entries.length === 0) return 0;
+  const useForce = document.getElementById('useForce').checked;
+  const useExclude = document.getElementById('useExclude').checked;
+  const useWeights = document.getElementById('useWeights').checked;
+  const forceIdx = parseInt(document.getElementById('forcePick').value, 10);
+  let excludedIdxs = entries.map((e, i) => e.excluded ? i : -1).filter(i => i >= 0);
+  if (useForce && entries[forceIdx] !== undefined) return forceIdx;
+  let pool = entries.map((e, i) => ({ i, w: useWeights ? e.weight : 1 }));
+  if (useExclude) pool = pool.filter(p => !excludedIdxs.includes(p.i));
+  if (pool.length === 0) pool = entries.map((e, i) => ({ i, w: 1 }));
+  const totalW = pool.reduce((s, p) => s + p.w, 0);
+  let rand = Math.random() * totalW;
+  for (const p of pool) { rand -= p.w; if (rand <= 0) return p.i; }
+  return pool[pool.length - 1].i;
+}
+
+// ---- Nobody won gag ----
+function triggerNobodyWon() {
+  const canvas = document.getElementById('wheelCanvas');
+  const banner = document.getElementById('resultBanner');
+  const mystery = document.getElementById('mysteryMark');
+  spinning = true; document.getElementById('spinBtn').disabled = true; stopTicking();
+  if (banner) { banner.textContent = 'Nobody won :D'; banner.className = 'result-banner spinning'; }
+  if (mystery) mystery.style.opacity = '0';
+  if (canvas) {
+    canvas.style.willChange = 'transform';
+    const accelDuration = 800, maxDeg = 1080, startTs = performance.now();
+    function accelFrame(now) {
+      const t = Math.min((now - startTs) / accelDuration, 1), eased = t * t;
+      canvas.style.transform = `rotate(${eased * maxDeg}deg)`;
+      if (t < 1) requestAnimationFrame(accelFrame);
+      else {
+        if (mystery) mystery.style.opacity = '1';
+        canvas.classList.add('fly-right');
+      }
+    }
+    requestAnimationFrame(accelFrame);
+    const onFlyEnd = (ev) => {
+      if (ev.animationName && ev.animationName.indexOf('flyRight') === -1) return;
+      canvas.removeEventListener('animationend', onFlyEnd);
+      canvas.classList.remove('fly-right'); canvas.style.transition = 'none';
+      canvas.style.transform = 'translateX(-120vw) rotate(-360deg)'; void canvas.offsetWidth;
+      canvas.classList.add('return-in');
+      const onReturn = (ev2) => {
+        if (ev2.animationName && ev2.animationName.indexOf('returnIn') === -1) return;
+        canvas.removeEventListener('animationend', onReturn);
+        canvas.classList.remove('return-in'); canvas.style.transform = ''; canvas.style.transition = '';
+        if (mystery) mystery.style.opacity = '0';
+        if (banner) { banner.textContent = 'Nobody won :D'; banner.className = 'result-banner win'; }
+        spinning = false; document.getElementById('spinBtn').disabled = false;
+      };
+      canvas.addEventListener('animationend', onReturn);
+    };
+    canvas.addEventListener('animationend', onFlyEnd);
+  } else {
+    setTimeout(() => { spinning = false; document.getElementById('spinBtn').disabled = false; }, 1200);
+  }
+}
+
+// ---- Spin ----
+document.getElementById('spinBtn').addEventListener('click', () => {
+  if (spinning || entries.length < 2) return;
+  spinning = true; document.getElementById('spinBtn').disabled = true;
+  document.getElementById('resultBanner').textContent = t('home.spinning');
+  document.getElementById('resultBanner').className = 'result-banner spinning';
+  try { startTicking(); } catch(e) {}
+
+  const useExclude = document.getElementById('useExclude').checked;
+  if (useExclude && entries.filter(e => e.excluded).length === entries.length) { triggerNobodyWon(); return; }
+
+  const winnerIdx = pickWinner();
+  lastWinnerIdx = winnerIdx;
+  const n = entries.length;
+  const { angles, cumulative } = computeSliceAngles();
+  const sliceAngleForWinner = angles[winnerIdx] || ((Math.PI * 2) / n);
+  const jitter = (Math.random() - 0.5) * sliceAngleForWinner * 0.55;
+  const rawTarget = -Math.PI / 2 - currentAngle - (cumulative[winnerIdx] + sliceAngleForWinner / 2) + jitter;
+  let mod = rawTarget % (Math.PI * 2); if (mod <= 0) mod += Math.PI * 2;
+  const totalDelta = mod + (5 + Math.floor(Math.random() * 4)) * Math.PI * 2;
+  const startAngle = currentAngle;
+  const spinSec = Math.max(0.2, Number(settings.spinTime) || 4);
+  const duration = Math.round(spinSec * 1000 + (Math.random() * 300 - 150));
+  const startTime = performance.now();
+  function ease(t) { return 1 - Math.pow(1 - t, 3); }
+
+  function frame(now) {
+    const p = Math.min((now - startTime) / duration, 1);
+    currentAngle = startAngle + totalDelta * ease(p);
+    if (p < 1) try { updateTickForAngle(currentAngle); } catch(e) {}
+    drawWheel(p >= 1 ? winnerIdx : -1);
+    if (p < 1) { requestAnimationFrame(frame); return; }
+    spinning = false; document.getElementById('spinBtn').disabled = false;
+    stopTicking();
+    const name = entries[winnerIdx].name;
+    document.getElementById('resultBanner').textContent = t('home.winner').replace('{name}', name);
+    document.getElementById('resultBanner').className = 'result-banner win';
+    addHistory(name);
+    try { showWinner(name); } catch(e) {}
+    // auto-remove is now deferred to hideWinner() (Awesome / Spin again buttons)
+  }
+  requestAnimationFrame(frame);
+});
+
+// ---- History ----
+function addHistory(name) {
+  const now = new Date();
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  spinHistory.unshift({ name, time });
+  const list = document.getElementById('historyList');
+  list.innerHTML = spinHistory.map(h => `<li><span class="winner">${escHtml(h.name)}</span><span>${h.time}</span></li>`).join('');
+}
+
+// ---- Confetti ----
+const confettiCanvas = document.getElementById('confettiCanvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+let confettiParticles = [], confettiRunning = false;
+function resizeConfetti() {
+  const dpr = window.devicePixelRatio || 1;
+  confettiCanvas.width = Math.floor(window.innerWidth * dpr); confettiCanvas.height = Math.floor(window.innerHeight * dpr);
+  confettiCanvas.style.width = window.innerWidth + 'px'; confettiCanvas.style.height = window.innerHeight + 'px';
+  confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resizeConfetti); resizeConfetti();
+
+function spawnConfetti() {
+  const colors = ['#f0c040','#e05a2b','#4a7fe8','#2fbf8a','#c44b8a','#06b6d4','#84cc16'];
+  confettiParticles = [];
+  for (let i = 0; i < 120; i++) confettiParticles.push({ x: Math.random() * window.innerWidth, y: -10 - Math.random() * 200, size: 6 + Math.random() * 10, velX: -60 + Math.random() * 120, velY: 40 + Math.random() * 160, rot: Math.random() * 360, rotVel: -120 + Math.random() * 240, color: colors[Math.floor(Math.random() * colors.length)] });
+}
+let lastCTS = 0;
+function runConfetti(duration = 3000) {
+  if (confettiRunning) return; confettiRunning = true; spawnConfetti(); lastCTS = performance.now();
+  function loop(now) {
+    const dt = Math.min(40, now - lastCTS) / 1000; lastCTS = now;
+    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confettiParticles.forEach(p => { p.x += p.velX * dt; p.y += p.velY * dt; p.velY += 300 * dt; p.rot += p.rotVel * dt; confettiCtx.save(); confettiCtx.translate(p.x, p.y); confettiCtx.rotate(p.rot * Math.PI / 180); confettiCtx.fillStyle = p.color; confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6); confettiCtx.restore(); });
+    confettiParticles = confettiParticles.filter(p => p.y < window.innerHeight + 200 && p.x > -200 && p.x < window.innerWidth + 200);
+    if (now - (lastCTS - dt * 1000) < duration && confettiParticles.length > 0) requestAnimationFrame(loop);
+    else { confettiRunning = false; confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); }
+  }
+  requestAnimationFrame(loop);
+}
+
+// ---- Winner popup ----
+function showWinner(name) {
+  const wb = document.getElementById('winnerBackdrop'), wn = document.getElementById('winnerName');
+  // title
+  const wtitle = document.getElementById('winnerTitle');
+  if (wtitle) wtitle.textContent = (settings.popupTitle || 'We have a winner!').replace('{name}', name);
+  // subtitle
+  const wsub = document.getElementById('winnerSubtitle');
+  if (wsub) { const sub = (settings.popupSubtitle || '').replace('{name}', name); wsub.textContent = sub || ' '; }
+  // name text (big yellow)
+  if (wn) wn.textContent = (settings.popupNameText || '{name}').replace('{name}', name);
+  if (wb) {
+    const popup = wb.querySelector('.winner-popup'); if (popup) popup.classList.remove('closing');
+    if (popup) { popup.style.animation = 'none'; void popup.offsetWidth; popup.style.animation = ''; }
+    wb.style.display = 'flex'; requestAnimationFrame(() => wb.classList.add('show'));
+  }
+  try { runConfetti(3500); } catch(e) {}
+}
+
+function hideWinner() {
+  const wb = document.getElementById('winnerBackdrop'); if (!wb) return;
+  const popup = wb.querySelector('.winner-popup');
+  if (popup) {
+    popup.classList.add('closing');
+    const onEnd = () => {
+      popup.removeEventListener('animationend', onEnd);
+      wb.classList.remove('show'); wb.style.display = 'none'; popup.classList.remove('closing');
+      // auto-remove with animation after popup closes
+      if (settings.autoRemoveWinner && lastWinnerIdx >= 0) {
+        try { animateRemoveEntry(lastWinnerIdx); } catch(e) {}
+        lastWinnerIdx = -1;
+      }
+    };
+    popup.addEventListener('animationend', onEnd);
+    setTimeout(() => { if (wb.classList.contains('show')) { wb.classList.remove('show'); wb.style.display = 'none'; popup.classList.remove('closing'); } }, 600);
+  } else {
+    wb.classList.remove('show'); wb.style.display = 'none';
+    if (settings.autoRemoveWinner && lastWinnerIdx >= 0) {
+      try { animateRemoveEntry(lastWinnerIdx); } catch(e) {}
+      lastWinnerIdx = -1;
+    }
+  }
+  confettiRunning = false; confettiParticles = [];
+  if (confettiCtx) confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  try { drawWheel(); } catch(e) {}
+}
+
+function animateRemoveEntry(idx) {
+  const list = document.getElementById('entriesList');
+  if (!list) { doRemoveEntry(idx); return; }
+  const rows = list.querySelectorAll('.entry-row');
+  const row = rows[idx];
+  if (!row) { doRemoveEntry(idx); return; }
+  row.classList.add('removing');
+  row.addEventListener('animationend', () => {
+    doRemoveEntry(idx);
+  }, { once: true });
+  // safety fallback
+  setTimeout(() => doRemoveEntry(idx), 600);
+}
+
+const _removeGuard = new Set();
+function doRemoveEntry(idx) {
+  const key = 'r' + idx + '_' + (entries[idx] ? entries[idx].name : '');
+  if (_removeGuard.has(key)) return;
+  _removeGuard.add(key);
+  setTimeout(() => _removeGuard.delete(key), 800);
+  if (idx >= 0 && idx < entries.length) entries.splice(idx, 1);
+  renderEntries(); drawWheel(); refreshSelects();
+  if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
+}
+
+document.getElementById('winnerClose').addEventListener('click', hideWinner);
+document.getElementById('winnerBackdrop').addEventListener('click', e => { if (e.target === e.currentTarget) hideWinner(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { hideWinner(); closeAllModals(); } });
+
+document.getElementById('winnerSpinAgain').addEventListener('click', () => {
+  hideWinner();
+  setTimeout(() => { const sb = document.getElementById('spinBtn'); if (sb) sb.click(); }, 480);
+});
+
+document.getElementById('winnerRemoveBtn').addEventListener('click', () => {
+  const savedIdx = lastWinnerIdx;
+  lastWinnerIdx = -1; // prevent auto-remove double-firing
+  const wb = document.getElementById('winnerBackdrop');
+  const popup = wb && wb.querySelector('.winner-popup');
+  if (popup) {
+    popup.classList.add('closing');
+    const onEnd = () => {
+      popup.removeEventListener('animationend', onEnd);
+      wb.classList.remove('show'); wb.style.display = 'none'; popup.classList.remove('closing');
+      if (savedIdx >= 0) { try { animateRemoveEntry(savedIdx); } catch(e) {} }
+    };
+    popup.addEventListener('animationend', onEnd);
+    setTimeout(() => { if (wb && wb.classList.contains('show')) { wb.classList.remove('show'); wb.style.display = 'none'; popup.classList.remove('closing'); if (savedIdx >= 0) try { animateRemoveEntry(savedIdx); } catch(e) {} } }, 600);
+  } else {
+    if (wb) { wb.classList.remove('show'); wb.style.display = 'none'; }
+    if (savedIdx >= 0) try { animateRemoveEntry(savedIdx); } catch(e) {}
+  }
+  confettiRunning = false; confettiParticles = [];
+  if (confettiCtx) confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  try { drawWheel(); } catch(e) {}
+});
+
+// ---- History controls (rigging panel) ----
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('clearHistoryBtn'); if (!btn) return;
+  btn.addEventListener('click', () => {
+    if (!confirm(t('confirm.clearHistory'))) return;
+    spinHistory = [];
+    const list = document.getElementById('historyList');
+    list.innerHTML = `<li style="color:var(--muted);font-style:italic;font-size:0.75rem;background:none;">${t('history.noSpins')}</li>`;
+  });
+  const addFake = document.getElementById('addFakeBtn'), fakeName = document.getElementById('fakeName'), fakeTime = document.getElementById('fakeTime');
+  if (fakeTime) { const d = new Date(); fakeTime.value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+  if (addFake) addFake.addEventListener('click', () => {
+    const name = (fakeName && fakeName.value) ? fakeName.value.trim() : '';
+    if (!name) { alert(t('error.enterName')); return; }
+    let timeVal = fakeTime && fakeTime.value ? fakeTime.value : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    spinHistory.unshift({ name, time: timeVal });
+    const list = document.getElementById('historyList');
+    list.innerHTML = spinHistory.map(h => `<li><span class="winner">${escHtml(h.name)}</span><span>${h.time}</span></li>`).join('');
+    fakeName.value = ''; const d = new Date(); fakeTime.value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  });
+});
+
+// ---- Init ----
+renderEntries(); refreshSelects(); drawWheel();
+document.getElementById('saveHomeBtn').addEventListener('click', saveHome);
+document.getElementById('loadHomeBtn').addEventListener('click', loadHome);
+document.getElementById('saveRigBtn').addEventListener('click', saveRig);
+document.getElementById('loadRigBtn').addEventListener('click', promptLoadRig);
+</script>
+</body>
+</html>
