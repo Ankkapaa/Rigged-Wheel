@@ -189,6 +189,33 @@
     transition: color 0.15s, border-color 0.15s;
   }
   .rig-small-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  .rig-small-btn.wip {
+    opacity: 0.38;
+    cursor: not-allowed;
+    position: relative;
+  }
+  .rig-small-btn.wip:hover { color: var(--muted); border-color: var(--border); }
+  .rig-small-btn.wip::after {
+    content: 'Work in progress';
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222228;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.68rem;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 5px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 50;
+  }
+  .rig-small-btn.wip:hover::after { opacity: 1; }
+
   .card-title {
     font-size: 0.7rem;
     font-weight: 700;
@@ -200,7 +227,7 @@
 
   .col-labels {
     display: grid;
-    grid-template-columns: 1fr 56px 48px 36px;
+    grid-template-columns: 1fr 64px 48px 36px;
     gap: 6px;
     margin-bottom: 5px;
   }
@@ -213,7 +240,7 @@
   }
   .entry-row {
     display: grid;
-    grid-template-columns: 1fr 56px 48px 36px;
+    grid-template-columns: 1fr 64px 48px 36px;
     gap: 6px;
     align-items: center;
     margin-bottom: 8px;
@@ -231,6 +258,24 @@
     transition: border-color 0.15s;
   }
   .entry-row input[type="text"]:focus { border-color: var(--accent); }
+
+  .entry-weight-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 5px 6px;
+    width: 100%;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .entry-weight-input:focus { border-color: var(--accent); }
+  .entry-weight-input:disabled { opacity: 0.45; cursor: not-allowed; color: rgba(240,236,228,0.35); }
+
   .del-btn {
     background: none;
     border: 1px solid var(--border);
@@ -244,6 +289,9 @@
     touch-action: manipulation;
   }
   .del-btn:hover { color: var(--red); border-color: var(--red); }
+  .del-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+  .del-btn:disabled:hover { color: var(--muted); border-color: var(--border); }
+
   .add-btn {
     background: none;
     border: 1px dashed var(--border);
@@ -283,7 +331,7 @@
   .history-list::-webkit-scrollbar { width: 4px; }
   .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-  /* ---- MODALS (shared base) ---- */
+  /* ---- MODALS ---- */
   .modal-backdrop {
     display: none;
     position: fixed; inset: 0;
@@ -295,9 +343,7 @@
     justify-content: center;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  @media (min-width: 520px) {
-    .modal-backdrop { align-items: center; }
-  }
+  @media (min-width: 520px) { .modal-backdrop { align-items: center; } }
   .modal-backdrop.open { display: flex; }
 
   .modal {
@@ -309,19 +355,13 @@
     max-width: 460px;
     max-height: 85vh;
     overflow-y: auto;
-    overflow-x: hidden; /* prevent horizontal scroll */
+    overflow-x: hidden;
     box-shadow: 0 -12px 60px rgba(0,0,0,0.6);
     position: relative;
-    /* ensure content never overflows horizontally */
     word-break: break-word;
   }
   @media (min-width: 520px) {
-    .modal {
-      border-radius: 14px;
-      padding: 28px 24px;
-      max-height: 90vh;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-    }
+    .modal { border-radius: 14px; padding: 28px 24px; max-height: 90vh; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
   }
   .modal-handle {
     width: 40px; height: 4px;
@@ -339,12 +379,7 @@
     color: var(--accent);
     margin-bottom: 4px;
   }
-  .modal-sub {
-    font-size: 0.7rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    margin-bottom: 22px;
-  }
+  .modal-sub { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 22px; }
   .modal-close {
     position: absolute;
     top: 20px; right: 16px;
@@ -367,17 +402,13 @@
     justify-content: space-between;
     margin-bottom: 14px;
     gap: 12px;
-    flex-wrap: wrap; /* allow wrapping on narrow screens */
-    min-width: 0; /* prevent flex overflow */
+    flex-wrap: wrap;
+    min-width: 0;
   }
   .rig-label { font-size: 0.82rem; color: var(--text); line-height: 1.3; flex: 1; min-width: 0; }
   .rig-label small { display: block; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
 
-  .toggle {
-    position: relative;
-    width: 44px; height: 24px;
-    flex-shrink: 0;
-  }
+  .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
   .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
   .toggle-track {
     position: absolute; inset: 0;
@@ -412,7 +443,6 @@
     min-width: 0;
   }
 
-  /* number input in modal */
   .modal-number-input {
     background: var(--bg);
     border: 1px solid var(--border);
@@ -427,64 +457,27 @@
   }
   .modal-number-input:focus { border-color: var(--accent); }
 
-  .modal-textarea {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 10px;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem;
-    resize: vertical;
-    outline: none;
-    min-height: 70px;
-  }
-  .modal-textarea:focus { border-color: var(--accent); }
-
   .exclude-list { display:flex; flex-direction:column; gap:6px; width: 100%; }
-  .exclude-item { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text); }
+  .exclude-item { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text); background: var(--bg); border: 1px solid var(--border); padding: 6px 8px; border-radius: 8px; }
   .exclude-item input[type="checkbox"] { width:18px; height:18px; accent-color: var(--accent); flex-shrink: 0; }
-  .exclude-item { background: var(--bg); border: 1px solid var(--border); padding: 6px 8px; border-radius: 8px; }
   .rig-row.disabled .exclude-item { color: rgba(240,236,228,0.35); }
   .exclude-item input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .weight-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 4px;
-    table-layout: fixed; /* prevent table from expanding beyond container */
-  }
+  .weight-table { width: 100%; border-collapse: collapse; margin-top: 4px; table-layout: fixed; }
   .weight-table th {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    font-weight: 700;
-    text-align: left;
-    padding: 0 6px 8px;
-    overflow: hidden;
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
+    font-weight: 700; text-align: left; padding: 0 6px 8px; overflow: hidden;
   }
   .weight-table th:last-child { text-align: center; }
   .weight-table td { padding: 4px 6px; overflow: hidden; }
   .w-name { font-size: 0.82rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .w-input, .fw-input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--accent);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    padding: 5px 6px;
-    width: 100%;
-    text-align: center;
-    outline: none;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+    color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 700;
+    padding: 5px 6px; width: 100%; text-align: center; outline: none;
   }
   .w-input:focus, .fw-input:focus { border-color: var(--accent); }
   .fw-input:disabled, .w-input:disabled { opacity: 0.6; cursor: not-allowed; color: rgba(240,236,228,0.35); }
-
-  /* column widths for weight table */
   .weight-table colgroup col:nth-child(1) { width: auto; }
   .weight-table colgroup col:nth-child(2) { width: 72px; }
   .weight-table colgroup col:nth-child(3) { width: 80px; }
@@ -498,217 +491,197 @@
 
   .fw-input::placeholder { color: var(--muted); opacity: 1; }
   .weight-table.fake-enabled .fw-input::placeholder { color: var(--accent); opacity: 1; }
-
   .entry-row input[type="text"]:disabled { color: rgba(240,236,228,0.35); background: var(--bg); border-color: var(--border); cursor: not-allowed; }
 
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 18px 0;
-  }
-  .subhead {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+  .subhead { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 12px; }
 
-  @media (max-width: 700px) {
-    .sidebar { width: 100%; max-width: 440px; }
-    .layout { gap: 20px; }
-  }
+  @media (max-width: 700px) { .sidebar { width: 100%; max-width: 440px; } .layout { gap: 20px; } }
 
-  /* ---- CONFETTI CANVAS ---- */
-  #confettiCanvas {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 200;
-  }
+  /* ---- CONFETTI ---- */
+  #confettiCanvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; }
 
   /* ---- WINNER POPUP ---- */
-  .winner-backdrop {
-    display: none;
-    position: fixed; inset: 0;
-    z-index: 300;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
+  .winner-backdrop { display: none; position: fixed; inset: 0; z-index: 300; align-items: center; justify-content: center; padding: 20px; }
   .winner-backdrop.show { display: flex; animation: backdropFade 260ms ease both; }
   @keyframes backdropFade { from { background: rgba(0,0,0,0); } to { background: rgba(0,0,0,0.75); } }
 
   .winner-popup {
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 48px 40px 36px;
-    text-align: center;
-    max-width: 380px;
-    width: 100%;
+    position: relative; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 48px 40px 36px; text-align: center; max-width: 380px; width: 100%;
     box-shadow: 0 32px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(240,192,64,0.15);
     animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
-  @keyframes popIn {
-    from { transform: scale(0.6) translateY(40px); opacity: 0; }
-    to   { transform: scale(1) translateY(0);      opacity: 1; }
-  }
+  @keyframes popIn { from { transform: scale(0.6) translateY(40px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
 
-  .winner-trophy {
-    font-size: 4rem;
-    line-height: 1;
-    margin-bottom: 12px;
-    animation: trophyBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
-    display: block;
-  }
-  @keyframes trophyBounce {
-    from { transform: scale(0) rotate(-20deg); opacity: 0; }
-    to   { transform: scale(1) rotate(0deg);  opacity: 1; }
-  }
+  .winner-trophy { font-size: 4rem; line-height: 1; margin-bottom: 12px; animation: trophyBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; display: block; }
+  @keyframes trophyBounce { from { transform: scale(0) rotate(-20deg); opacity: 0; } to { transform: scale(1) rotate(0deg); opacity: 1; } }
 
-  .winner-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-    color: var(--muted);
-    margin-bottom: 4px;
-  }
-
+  .winner-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.25em; color: var(--muted); margin-bottom: 4px; }
   .winner-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.4rem, 10vw, 3.6rem);
-    letter-spacing: 0.04em;
-    color: var(--accent);
-    text-shadow: 0 0 40px rgba(240,192,64,0.5);
-    line-height: 1.05;
-    margin-bottom: 28px;
-    animation: nameReveal 0.5s ease 0.35s both;
-    word-break: break-word;
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.4rem, 10vw, 3.6rem); letter-spacing: 0.04em;
+    color: var(--accent); text-shadow: 0 0 40px rgba(240,192,64,0.5); line-height: 1.05;
+    margin-bottom: 28px; animation: nameReveal 0.5s ease 0.35s both; word-break: break-word;
   }
-  @keyframes nameReveal {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes nameReveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .winner-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+  .winner-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
   .winner-close, .winner-spinagain, .winner-remove {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.05rem;
-    letter-spacing: 0.1em;
-    border: none;
-    padding: 12px 22px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.1s;
-    touch-action: manipulation;
-    animation: nameReveal 0.4s ease 0.5s both;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.05rem; letter-spacing: 0.1em; border: none;
+    padding: 12px 22px; border-radius: 6px; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
+    touch-action: manipulation; animation: nameReveal 0.4s ease 0.5s both;
   }
-  .winner-close {
-    background: var(--accent);
-    color: #0d0d0f;
-    box-shadow: 0 4px 20px rgba(240,192,64,0.35);
-  }
+  .winner-close { background: var(--accent); color: #0d0d0f; box-shadow: 0 4px 20px rgba(240,192,64,0.35); }
   .winner-close:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(240,192,64,0.5); }
-  .winner-spinagain {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border) !important;
-  }
+  .winner-spinagain { background: transparent; color: var(--text); border: 1px solid var(--border) !important; }
   .winner-spinagain:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
-  .winner-remove {
-    background: rgba(248,113,113,0.15);
-    color: var(--red);
-    border: 1px solid rgba(248,113,113,0.35) !important;
-  }
+  .winner-remove { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.35) !important; }
   .winner-remove:hover { background: rgba(248,113,113,0.25); transform: translateY(-2px); }
 
   .winner-popup::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 22px;
+    content: ''; position: absolute; inset: -2px; border-radius: 22px;
     background: conic-gradient(from 0deg, #f0c040, #e05a2b, #4a7fe8, #c44b8a, #2fbf8a, #f0c040);
-    z-index: -1;
-    opacity: 0;
-    animation: ringPulse 2s ease 0.3s infinite;
+    z-index: -1; opacity: 0; animation: ringPulse 2s ease 0.3s infinite;
   }
-  @keyframes ringPulse {
-    0%, 100% { opacity: 0; transform: scale(1); }
-    50%       { opacity: 0.6; transform: scale(1.01); }
-  }
+  @keyframes ringPulse { 0%, 100% { opacity: 0; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.01); } }
+  @keyframes labelFlash { 0%, 100% { color: var(--muted); } 50% { color: #fff; } }
+  @keyframes subtitleFlash { 0%, 100% { color: var(--muted); } 50% { color: rgba(255,255,255,0.75); } }
+  .winner-popup .winner-label { animation: labelFlash 2s ease 0.3s infinite; }
+  .winner-popup .winner-custom-msg { animation: subtitleFlash 2s ease 0.3s infinite; }
 
-  /* flash title/subtitle white in sync with the ring pulse */
-  @keyframes labelFlash {
-    0%, 100% { color: var(--muted); }
-    50%       { color: #fff; }
-  }
-  @keyframes subtitleFlash {
-    0%, 100% { color: var(--muted); }
-    50%       { color: rgba(255,255,255,0.75); }
-  }
-  .winner-popup .winner-label {
-    animation: labelFlash 2s ease 0.3s infinite;
-  }
-  .winner-popup .winner-custom-msg {
-    animation: subtitleFlash 2s ease 0.3s infinite;
-  }
-
-  /* winner removal animation */
   @keyframes entryRemoveAnim {
-    0%   { transform: translateX(0) scaleY(1); opacity: 1; max-height: 60px; margin-bottom: 8px; }
-    40%  { transform: translateX(12px) scaleY(0.9); opacity: 0.6; }
-    70%  { transform: translateX(-8px) scaleY(0.7); opacity: 0.3; max-height: 60px; margin-bottom: 8px; }
+    0% { transform: translateX(0) scaleY(1); opacity: 1; max-height: 60px; margin-bottom: 8px; }
+    40% { transform: translateX(12px) scaleY(0.9); opacity: 0.6; }
+    70% { transform: translateX(-8px) scaleY(0.7); opacity: 0.3; max-height: 60px; margin-bottom: 8px; }
     100% { transform: translateX(60px) scaleY(0); opacity: 0; max-height: 0; margin-bottom: 0; padding: 0; }
   }
-  .entry-row.removing {
-    animation: entryRemoveAnim 480ms cubic-bezier(.4,0,.2,1) forwards;
-    overflow: hidden;
-    pointer-events: none;
-  }
-
+  .entry-row.removing { animation: entryRemoveAnim 480ms cubic-bezier(.4,0,.2,1) forwards; overflow: hidden; pointer-events: none; }
   .winner-popup.closing { animation: popupClose 420ms cubic-bezier(.2,.9,.3,1) forwards; }
-  @keyframes popupClose {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(28px) scale(0.86); }
-  }
+  @keyframes popupClose { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(28px) scale(0.86); } }
 
-  /* fake entry time input */
   input[type="time"] {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem;
-    padding: 6px 8px;
-    outline: none;
-    color-scheme: dark;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; padding: 6px 8px; outline: none; color-scheme: dark;
   }
-
-  /* inline text input in modal rows */
   .modal-text-input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem;
-    padding: 6px 8px;
-    outline: none;
-    min-width: 0;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; padding: 6px 8px; outline: none; min-width: 0;
   }
   .modal-text-input:focus { border-color: var(--accent); }
+
+  /* ============================================================
+     TOAST NOTIFICATION SYSTEM
+     ============================================================ */
+  #toastContainer {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+    width: min(420px, calc(100vw - 32px));
+  }
+
+  .toast {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px 0;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+    pointer-events: all;
+    overflow: hidden;
+    position: relative;
+    animation: toastIn 380ms cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  }
+  .toast.toast-out {
+    animation: toastOut 320ms cubic-bezier(0.4, 0, 1, 0.6) forwards;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.94); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateY(0) scale(1); max-height: 120px; margin-bottom: 0; }
+    to   { opacity: 0; transform: translateY(12px) scale(0.9); max-height: 0; margin-bottom: -10px; }
+  }
+
+  /* left accent stripe based on variant */
+  .toast::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 12px 0 0 12px;
+    background: var(--toast-color, var(--accent));
+  }
+
+  .toast-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding-left: 12px;
+    padding-bottom: 14px;
+  }
+
+  .toast-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .toast-body { flex: 1; min-width: 0; }
+
+  .toast-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    color: var(--toast-color, var(--accent));
+    line-height: 1.1;
+    margin-bottom: 2px;
+  }
+
+  .toast-subtitle {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .toast-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0 0 0 8px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.15s;
+    align-self: flex-start;
+  }
+  .toast-close:hover { color: var(--text); }
+
+  /* Progress bar at bottom */
+  .toast-progress-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+  }
+  .toast-progress-bar {
+    height: 100%;
+    border-radius: 0 0 12px 12px;
+    background: var(--toast-color, var(--accent));
+    opacity: 0.6;
+    transform-origin: left;
+    /* width set via JS animation */
+  }
 </style>
 </head>
 <body>
@@ -722,9 +695,33 @@
     <option value="en">English</option>
     <option value="fi">Suomi</option>
   </select>
-  <button id="saveHomeBtn" class="rig-small-btn" style="margin-left:8px;">Save</button>
-  <button id="loadHomeBtn" class="rig-small-btn">Load</button>
+  <button id="saveHomeBtn" class="rig-small-btn wip" style="margin-left:8px;" disabled>Save</button>
+  <button id="loadHomeBtn" class="rig-small-btn wip" disabled>Load</button>
   <button id="customizeBtn" class="rig-small-btn">Customize</button>
+
+  <!-- Advanced options -->
+  <details id="advancedOpts" style="margin-left:8px;">
+    <summary class="rig-small-btn" style="list-style:none;cursor:pointer;">Advanced</summary>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:8px;width:320px;box-shadow:0 8px 24px rgba(0,0,0,0.5);border-radius:8px;background:var(--surface);border:1px solid var(--border);margin-top:6px;">
+      <div class="rig-row">
+        <div class="rig-label">Win cooldown<small>Winner can't win again for N spins</small></div>
+        <label class="toggle"><input type="checkbox" id="useCooldown"><div class="toggle-track"></div></label>
+      </div>
+      <div class="rig-row" id="cooldownRow" style="opacity:0.35;pointer-events:none;">
+        <div class="rig-label">Cooldown spins<small>How many spins before eligible again</small></div>
+        <input type="number" id="cooldownSpins" class="modal-number-input" value="1" min="1" max="99" step="1">
+      </div>
+
+      <div class="rig-row">
+        <div class="rig-label">Max wins per session<small>Remove person after winning this many times</small></div>
+        <label class="toggle"><input type="checkbox" id="useMaxWins"><div class="toggle-track"></div></label>
+      </div>
+      <div class="rig-row" id="maxWinsRow" style="opacity:0.35;pointer-events:none;">
+        <div class="rig-label">Max wins</div>
+        <input type="number" id="maxWinsInput" class="modal-number-input" value="1" min="1" max="99" step="1">
+      </div>
+    </div>
+  </details>
 </div>
 
 <div class="layout">
@@ -762,6 +759,9 @@
     </div>
   </div>
 </div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
 
 <!-- CONFETTI -->
 <canvas id="confettiCanvas"></canvas>
@@ -806,16 +806,28 @@
       <label class="toggle"><input type="checkbox" id="autoRemoveWinner"><div class="toggle-track"></div></label>
     </div>
     <div class="rig-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
-      <div class="rig-label">Popup title<small>Big header text (e.g. "We have a winner!")</small></div>
+      <div class="rig-label">Popup title<small>Big header text</small></div>
       <input id="popupTitleInput" type="text" class="modal-text-input" style="width:100%;" value="We have a winner!">
     </div>
     <div class="rig-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
-      <div class="rig-label">Popup subtitle<small>Smaller line below title. Use {name} for winner's name</small></div>
+      <div class="rig-label">Popup subtitle<small>Use {name} for winner's name</small></div>
       <input id="popupSubtitleInput" type="text" class="modal-text-input" style="width:100%;" value="🎉 Congratulations!">
     </div>
     <div class="rig-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
-      <div class="rig-label">Winner name text<small>The big yellow text. Use {name} or any fixed text</small></div>
+      <div class="rig-label">Winner name text<small>Use {name} or fixed text</small></div>
       <input id="popupNameInput" type="text" class="modal-text-input" style="width:100%;" value="{name}">
+    </div>
+
+    <hr class="divider">
+    <div class="subhead">Drama Mode</div>
+
+    <div class="rig-row">
+      <div class="rig-label">Delay reveal<small>Wheel stops but winner is hidden for a suspenseful pause</small></div>
+      <label class="toggle"><input type="checkbox" id="useDelayReveal"><div class="toggle-track"></div></label>
+    </div>
+    <div class="rig-row" id="delayRevealRow" style="opacity:0.35;pointer-events:none;">
+      <div class="rig-label">Delay seconds<small>How long to keep winner secret</small></div>
+      <input type="number" id="delayRevealSecs" class="modal-number-input" value="2" min="0.5" max="30" step="0.5">
     </div>
 
     <hr class="divider">
@@ -835,31 +847,23 @@
     <div class="modal-sub" data-i18n="modal.sub">Secret panel ;)</div>
 
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-      <button id="saveRigBtn" class="rig-small-btn">Save rig</button>
-      <button id="loadRigBtn" class="rig-small-btn">Load rig</button>
+      <button id="saveRigBtn" class="rig-small-btn wip" disabled>Save rig</button>
+      <button id="loadRigBtn" class="rig-small-btn wip" disabled>Load rig</button>
     </div>
 
+    <!-- WEIGHTS -->
     <div class="subhead" data-i18n="subhead.weights">Hidden Weights</div>
     <div class="rig-row">
       <div class="rig-label" data-i18n="label.useWeights">Use weights<small data-i18n="label.useWeights.small">Higher = more likely to win</small></div>
-      <label class="toggle">
-        <input type="checkbox" id="useWeights" checked>
-        <div class="toggle-track"></div>
-      </label>
+      <label class="toggle"><input type="checkbox" id="useWeights" checked><div class="toggle-track"></div></label>
     </div>
     <div class="rig-row">
       <div class="rig-label" data-i18n="label.displayWeights">Display weighted slices<small data-i18n="label.displayWeights.small">Show slices proportional to weights</small></div>
-      <label class="toggle">
-        <input type="checkbox" id="displayWeighted">
-        <div class="toggle-track"></div>
-      </label>
+      <label class="toggle"><input type="checkbox" id="displayWeighted"><div class="toggle-track"></div></label>
     </div>
     <div class="rig-row">
       <div class="rig-label" data-i18n="label.showFakeWeights">Show fake weights<small data-i18n="label.showFakeWeights.small">Visual only — does not affect winner selection</small></div>
-      <label class="toggle">
-        <input type="checkbox" id="showFakeWeights">
-        <div class="toggle-track"></div>
-      </label>
+      <label class="toggle"><input type="checkbox" id="showFakeWeights"><div class="toggle-track"></div></label>
     </div>
     <div style="overflow-x:hidden;width:100%;">
       <table class="weight-table">
@@ -870,14 +874,12 @@
     </div>
 
     <hr class="divider">
+    <!-- OVERRIDE CONTROLS -->
     <div class="subhead" data-i18n="subhead.override">Override Controls</div>
 
     <div class="rig-row">
       <div class="rig-label" data-i18n="label.forceWinner">Force winner<small data-i18n="label.forceWinner.small">Always pick this person</small></div>
-      <label class="toggle">
-        <input type="checkbox" id="useForce">
-        <div class="toggle-track"></div>
-      </label>
+      <label class="toggle"><input type="checkbox" id="useForce"><div class="toggle-track"></div></label>
     </div>
     <div class="rig-row" id="forcePickRow" style="opacity:0.35;pointer-events:none;">
       <div class="rig-label" data-i18n="label.forcedWinner">Forced winner</div>
@@ -886,10 +888,7 @@
 
     <div class="rig-row">
       <div class="rig-label" data-i18n="label.exclude">Exclude from winning<small data-i18n="label.exclude.small">These people can never win</small></div>
-      <label class="toggle">
-        <input type="checkbox" id="useExclude">
-        <div class="toggle-track"></div>
-      </label>
+      <label class="toggle"><input type="checkbox" id="useExclude"><div class="toggle-track"></div></label>
     </div>
     <div class="rig-row" id="excludePickRow" style="opacity:0.35;pointer-events:none;flex-direction:column;align-items:flex-start;">
       <div class="rig-label" data-i18n="label.excludedPerson" style="margin-bottom:6px;">Excluded persons</div>
@@ -897,6 +896,20 @@
     </div>
 
     <hr class="divider">
+    <!-- FAKE LANDING -->
+    <div class="subhead">Drama Mode</div>
+
+    <div class="rig-row">
+      <div class="rig-label">Fake landing<small>Wheel visually stops on a decoy, then jumps to the real winner</small></div>
+      <label class="toggle"><input type="checkbox" id="useFakeLanding"><div class="toggle-track"></div></label>
+    </div>
+    <div class="rig-row" id="fakeLandingRow" style="opacity:0.35;pointer-events:none;">
+      <div class="rig-label">Fake winner</div>
+      <select class="rig-select" id="fakeLandingPick"></select>
+    </div>
+
+    <hr class="divider">
+    <!-- HISTORY -->
     <div class="subhead">History</div>
     <div class="rig-row">
       <div class="rig-label" data-i18n="label.resultsHistory">Results history</div>
@@ -914,6 +927,92 @@
 </div>
 
 <script>
+/* ================================================================
+   TOAST NOTIFICATION SYSTEM
+================================================================ */
+const TOAST_COLORS = {
+  success: '#4ade80',
+  info: '#f0c040',
+  warning: '#fb923c',
+  error: '#f87171',
+};
+
+let _toastIdCounter = 0;
+
+function showToast({ title = '', subtitle = '', icon = '', variant = 'info', duration = 3500 } = {}) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const id = ++_toastIdCounter;
+  const color = TOAST_COLORS[variant] || TOAST_COLORS.info;
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.dataset.id = id;
+  toast.style.setProperty('--toast-color', color);
+
+  toast.innerHTML = `
+    <div class="toast-inner">
+      ${icon ? `<div class="toast-icon">${icon}</div>` : ''}
+      <div class="toast-body">
+        <div class="toast-title">${escHtml(title)}</div>
+        ${subtitle ? `<div class="toast-subtitle">${escHtml(subtitle)}</div>` : ''}
+      </div>
+      <button class="toast-close" aria-label="Dismiss">✕</button>
+    </div>
+    <div class="toast-progress-track">
+      <div class="toast-progress-bar" id="toastBar_${id}"></div>
+    </div>
+  `;
+
+  container.appendChild(toast);
+
+  const bar = document.getElementById('toastBar_' + id);
+  if (bar) {
+    bar.style.width = '100%';
+    bar.style.transition = `width ${duration}ms linear`;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { bar.style.width = '0%'; });
+    });
+  }
+
+  function dismiss() {
+    if (toast.dataset.dismissed) return;
+    toast.dataset.dismissed = '1';
+    toast.classList.add('toast-out');
+    toast.addEventListener('animationend', () => toast.remove(), { once: true });
+    setTimeout(() => toast.remove(), 400);
+  }
+
+  const timerId = setTimeout(dismiss, duration);
+
+  toast.querySelector('.toast-close').addEventListener('click', () => {
+    clearTimeout(timerId);
+    dismiss();
+  });
+
+  let pausedAt = null, remaining = duration;
+  toast.addEventListener('mouseenter', () => {
+    pausedAt = Date.now();
+    clearTimeout(timerId);
+    if (bar) { bar.style.transition = 'none'; }
+  });
+  toast.addEventListener('mouseleave', () => {
+    if (pausedAt !== null) {
+      remaining -= Date.now() - pausedAt;
+      pausedAt = null;
+      if (bar) {
+        bar.style.transition = `width ${remaining}ms linear`;
+        bar.style.width = '0%';
+      }
+      setTimeout(dismiss, remaining);
+    }
+  });
+}
+
+/* ================================================================
+   ENTRIES + SETTINGS
+================================================================ */
 let entries = [
   { name: "Alice",  weight: 1 },
   { name: "Bob",    weight: 1 },
@@ -922,14 +1021,19 @@ let entries = [
   { name: "Eve",    weight: 1 },
 ];
 
-// --- Settings ---
+let sessionWins = {};
+let cooldownMap = {};
+let totalSpinsSoFar = 0;
+
 let settings = {
   spinTime: 4,
   tickDuringSpin: false,
   popupTitle: 'We have a winner!',
   popupSubtitle: '🎉 Congratulations!',
   popupNameText: '{name}',
-  autoRemoveWinner: false
+  autoRemoveWinner: false,
+  useDelayReveal: false,
+  delayRevealSecs: 2
 };
 
 function loadSettings() {
@@ -947,6 +1051,8 @@ function applySettingsToUI() {
   const psi = document.getElementById('popupSubtitleInput'); if (psi) psi.value = settings.popupSubtitle;
   const pni = document.getElementById('popupNameInput'); if (pni) pni.value = settings.popupNameText;
   const ar = document.getElementById('autoRemoveWinner'); if (ar) ar.checked = !!settings.autoRemoveWinner;
+  const dchk = document.getElementById('useDelayReveal'); if (dchk) dchk.checked = !!settings.useDelayReveal;
+  const dsecs = document.getElementById('delayRevealSecs'); if (dsecs) dsecs.value = settings.delayRevealSecs;
 }
 
 function saveSettings() {
@@ -957,11 +1063,17 @@ function saveSettings() {
     const psi = document.getElementById('popupSubtitleInput'); if (psi) settings.popupSubtitle = psi.value;
     const pni = document.getElementById('popupNameInput'); if (pni) settings.popupNameText = pni.value || settings.popupNameText;
     const ar = document.getElementById('autoRemoveWinner'); if (ar) settings.autoRemoveWinner = !!ar.checked;
+    const dchk = document.getElementById('useDelayReveal'); if (dchk) settings.useDelayReveal = !!dchk.checked;
+    const dsecs = document.getElementById('delayRevealSecs'); if (dsecs) settings.delayRevealSecs = Math.max(0.5, parseFloat(dsecs.value) || 2);
     localStorage.setItem('wheel.settings', JSON.stringify(settings));
-  } catch (err) { alert('Error: Failed to save settings.'); }
+  } catch (err) {
+    showToast({ title: 'Save failed', subtitle: 'Could not save settings', icon: '❌', variant: 'error' });
+    return;
+  }
+  showToast({ title: 'Settings saved', subtitle: 'Customizations applied successfully', icon: '✅', variant: 'success', duration: 3000 });
 }
 
-// ---- Audio ticking ----
+/* ---- Audio ticking ---- */
 let audioCtx = null, tickIntervalId = null;
 function playTick() {
   try {
@@ -977,29 +1089,26 @@ function playTick() {
     o.stop(now + 0.07);
   } catch (e) {}
 }
-// boundary-aware ticking: fires playTick() each time the pointer crosses a slice line
 let lastTickSector = -1;
 function updateTickForAngle(angle) {
   if (!settings.tickDuringSpin) return;
   const n = entries.length; if (n < 2) return;
   const { cumulative } = computeSliceAngles();
-  // normalize angle to [0, 2PI)
   const TWO_PI = Math.PI * 2;
-  // pointer is at -PI/2; find which sector the pointer sits in
   const pointerAngle = (-Math.PI / 2 - angle % TWO_PI + TWO_PI * 10) % TWO_PI;
   let sector = 0;
   for (let i = n - 1; i >= 0; i--) {
     if (pointerAngle >= cumulative[i]) { sector = i; break; }
   }
   if (sector !== lastTickSector) {
-    if (lastTickSector !== -1) playTick(); // don't tick on the very first frame
+    if (lastTickSector !== -1) playTick();
     lastTickSector = sector;
   }
 }
 function startTicking() { lastTickSector = -1; }
 function stopTicking() { if (tickIntervalId) { clearInterval(tickIntervalId); tickIntervalId = null; } }
 
-// --- Translations ---
+/* ---- Translations ---- */
 const TRANSLATIONS = {
   en: {
     'home.title': 'Spin the Wheel', 'home.subtitle': 'by Ankanpää',
@@ -1057,103 +1166,21 @@ function localize() {
     if (hasChildTrans) { const f = el.firstChild; if (f && f.nodeType === Node.TEXT_NODE) f.nodeValue = t(key); }
     else el.textContent = t(key);
   });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const k = el.getAttribute('data-i18n-placeholder'); if (k) el.placeholder = t(k); });
   document.title = t('home.title');
   const ph = document.getElementById('historyPlaceholder'); if (ph) ph.textContent = t('history.noSpins');
 }
 function setLanguage(lang) { currentLang = lang in TRANSLATIONS ? lang : 'en'; localize(); }
 
-// ---- Save/Load ----
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-
-function downloadJSON(filename, obj) {
-  try {
-    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  } catch (e) {}
-}
-
-function saveHome() {
-  try {
-    const payload = { entries: entries.map(e => ({ name: e.name, color: e.color })), lang: currentLang, history: spinHistory || [] };
-    localStorage.setItem('wheel.home', JSON.stringify(payload));
-    downloadJSON(`wheel-home-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`, payload);
-    alert(t('btn.save') + ' ✓');
-  } catch (e) { alert('Save failed'); }
-}
-
-function loadHome() {
-  try {
-    const raw = localStorage.getItem('wheel.home');
-    if (!raw) { alert('No saved home data'); return; }
-    applyHomeData(JSON.parse(raw));
-    alert(t('btn.load') + ' ✓');
-  } catch (e) { alert('Load failed'); }
-}
-
-function applyHomeData(data) {
-  if (Array.isArray(data.entries)) entries = data.entries.map(e => ({ name: e.name || 'Entry', weight: 1, color: e.color || null }));
-  if (data.lang) setLanguage(data.lang);
-  spinHistory = Array.isArray(data.history) ? data.history : [];
-  renderEntries(); renderWeightTable(); refreshSelects(); drawWheel();
-  const list = document.getElementById('historyList');
-  if (list) list.innerHTML = spinHistory.length ? spinHistory.map(h => `<li><span class="winner">${escHtml(h.name)}</span><span>${escHtml(h.time)}</span></li>`).join('') : `<li id="historyPlaceholder" style="color:var(--muted);font-style:italic;font-size:0.75rem;background:none;">${t('history.noSpins')}</li>`;
-}
-
-function saveRig() {
-  try {
-    const payload = {
-      useWeights: !!document.getElementById('useWeights')?.checked,
-      displayWeighted: !!document.getElementById('displayWeighted')?.checked,
-      showFakeWeights: !!document.getElementById('showFakeWeights')?.checked,
-      useExclude: !!document.getElementById('useExclude')?.checked,
-      useForce: !!document.getElementById('useForce')?.checked,
-      forcePick: parseInt(document.getElementById('forcePick')?.value || '0', 10),
-      entries: entries.map(e => ({ weight: e.weight, fakeWeight: e.fakeWeight }))
-    };
-    localStorage.setItem('wheel.rig', JSON.stringify(payload));
-    downloadJSON(`wheel-rig-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`, payload);
-    alert(t('btn.save') + ' ✓');
-  } catch (e) { alert('Save failed'); }
-}
-
-function applyRigData(data) {
-  if (data.useWeights !== undefined) document.getElementById('useWeights').checked = !!data.useWeights;
-  if (data.displayWeighted !== undefined) document.getElementById('displayWeighted').checked = !!data.displayWeighted;
-  if (data.showFakeWeights !== undefined) document.getElementById('showFakeWeights').checked = !!data.showFakeWeights;
-  if (data.useExclude !== undefined) document.getElementById('useExclude').checked = !!data.useExclude;
-  if (data.useForce !== undefined) document.getElementById('useForce').checked = !!data.useForce;
-  if (!isNaN(data.forcePick)) document.getElementById('forcePick').value = String(data.forcePick);
-  if (Array.isArray(data.entries)) {
-    for (let i = 0; i < data.entries.length && i < entries.length; i++) {
-      if (data.entries[i].weight !== undefined) entries[i].weight = data.entries[i].weight;
-      if (data.entries[i].fakeWeight !== undefined) entries[i].fakeWeight = data.entries[i].fakeWeight;
-    }
-  }
-  renderWeightTable(); renderEntries(); drawWheel(); refreshSelects();
-}
-
-function promptLoadRig() {
-  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json';
-  inp.addEventListener('change', e => {
-    const f = e.target.files && e.target.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = ev => { try { const d = JSON.parse(ev.target.result); localStorage.setItem('wheel.rig', JSON.stringify(d)); applyRigData(d); alert(t('btn.load') + ' ✓'); } catch (e) { alert('Invalid file'); } };
-    r.readAsText(f);
-  });
-  inp.click();
-}
 
 const COLORS = ["#e05a2b","#f0c040","#4a7fe8","#c44b8a","#2fbf8a","#e8734a","#8b5cf6","#06b6d4","#f43f5e","#84cc16"];
 
 const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
 let currentAngle = 0, spinning = false, spinHistory = [];
-let lastWinnerIdx = -1; // track for remove button
+let lastWinnerIdx = -1;
 
-// ---- Modals ----
+/* ---- Modals ---- */
 document.getElementById('subtitleTrigger').addEventListener('click', () => toggleModal('rigModal'));
 document.getElementById('customizeBtn').addEventListener('click', () => { applySettingsToUI(); toggleModal('customizeModal'); });
 
@@ -1173,37 +1200,52 @@ document.getElementById('customizeModal').addEventListener('click', e => { if (e
 document.getElementById('saveCustomizeBtn').addEventListener('click', () => { saveSettings(); applySettingsToUI(); closeModal('customizeModal'); });
 document.getElementById('cancelCustomizeBtn').addEventListener('click', () => closeModal('customizeModal'));
 
-function toggleModal(id) { const m = document.getElementById(id); const opening = !m.classList.contains('open'); closeAllModals(); if (opening) { m.classList.add('open'); if (id === 'rigModal') renderWeightTable(); } }
+function toggleModal(id) {
+  const m = document.getElementById(id);
+  const opening = !m.classList.contains('open');
+  closeAllModals();
+  if (opening) { m.classList.add('open'); if (id === 'rigModal') renderWeightTable(); }
+}
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function closeAllModals() { document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open')); }
 
-// ---- Rig toggles ----
+/* ---- Rig toggle helpers ---- */
+function setRowEnabled(rowId, enabled) {
+  const row = document.getElementById(rowId); if (!row) return;
+  row.style.opacity = enabled ? '1' : '0.35';
+  row.style.pointerEvents = enabled ? 'auto' : 'none';
+}
+
 document.getElementById('useForce').addEventListener('change', function() {
-  const row = document.getElementById('forcePickRow');
-  row.style.opacity = this.checked ? '1' : '0.35';
-  row.style.pointerEvents = this.checked ? 'auto' : 'none';
+  setRowEnabled('forcePickRow', this.checked);
   const useExcludeChk = document.getElementById('useExclude');
   const excludeRow = document.getElementById('excludePickRow');
-  if (useExcludeChk && excludeRow) {
-    if (this.checked) {
-      useExcludeChk.checked = false; useExcludeChk.disabled = true;
-      excludeRow.classList.add('disabled'); excludeRow.style.opacity = '0.35'; excludeRow.style.pointerEvents = 'none';
-    } else {
-      useExcludeChk.disabled = false;
-      excludeRow.classList.toggle('disabled', !useExcludeChk.checked);
-      excludeRow.style.opacity = useExcludeChk.checked ? '1' : '0.35';
-      excludeRow.style.pointerEvents = useExcludeChk.checked ? 'auto' : 'none';
-    }
-    try { renderExcludeList(); } catch(e) {}
+  if (this.checked) {
+    useExcludeChk.checked = false; useExcludeChk.disabled = true;
+    excludeRow.classList.add('disabled'); setRowEnabled('excludePickRow', false);
+  } else {
+    useExcludeChk.disabled = false;
+    excludeRow.classList.toggle('disabled', !useExcludeChk.checked);
+    setRowEnabled('excludePickRow', useExcludeChk.checked);
   }
+  try { renderExcludeList(); } catch(e) {}
 });
 
 document.getElementById('useExclude').addEventListener('change', function() {
-  const row = document.getElementById('excludePickRow');
-  row.style.opacity = this.checked ? '1' : '0.35';
-  row.style.pointerEvents = this.checked ? 'auto' : 'none';
-  row.classList.toggle('disabled', !this.checked);
+  setRowEnabled('excludePickRow', this.checked);
+  document.getElementById('excludePickRow').classList.toggle('disabled', !this.checked);
   try { renderExcludeList(); } catch(e) {}
+});
+
+document.getElementById('useCooldown').addEventListener('change', function() { setRowEnabled('cooldownRow', this.checked); });
+document.getElementById('useMaxWins').addEventListener('change', function() { setRowEnabled('maxWinsRow', this.checked); });
+document.getElementById('useDelayReveal').addEventListener('change', function() { setRowEnabled('delayRevealRow', this.checked); });
+document.getElementById('useFakeLanding').addEventListener('change', function() {
+  setRowEnabled('fakeLandingRow', this.checked);
+  if (this.checked) {
+    const uf = document.getElementById('useForce');
+    if (uf && uf.checked) { uf.checked = false; uf.dispatchEvent(new Event('change')); }
+  }
 });
 
 const displayWeightedChk = document.getElementById('displayWeighted');
@@ -1217,7 +1259,6 @@ if (useWeightsChk) useWeightsChk.addEventListener('change', () => { drawWheel();
 function syncWeightToggles() {
   const useW = useWeightsChk ? useWeightsChk.checked : true;
   const showFake = showFakeWeightsChk ? showFakeWeightsChk.checked : false;
-  const dispW = displayWeightedChk ? displayWeightedChk.checked : false;
   if (!useW) {
     if (displayWeightedChk) { displayWeightedChk.checked = false; displayWeightedChk.disabled = true; const r = displayWeightedChk.closest('.rig-row'); if (r) r.classList.add('disabled'); }
     if (showFakeWeightsChk) { showFakeWeightsChk.checked = false; showFakeWeightsChk.disabled = true; const r = showFakeWeightsChk.closest('.rig-row'); if (r) r.classList.add('disabled'); }
@@ -1235,7 +1276,7 @@ if (langSelect) { langSelect.value = currentLang; langSelect.addEventListener('c
 localize();
 loadSettings();
 
-// ---- Weight table ----
+/* ---- Weight table ---- */
 function renderWeightTable() {
   const tbody = document.getElementById('weightBody');
   const showFake = showFakeWeightsChk ? showFakeWeightsChk.checked : false;
@@ -1250,7 +1291,8 @@ function renderWeightTable() {
   const table = document.querySelector('.weight-table'); if (table) table.classList.toggle('fake-enabled', showFake);
   renderExcludeList();
   tbody.querySelectorAll('.w-input').forEach(inp => inp.addEventListener('input', ev => {
-    entries[+ev.target.dataset.i].weight = Math.max(0.1, parseFloat(ev.target.value) || 0.1); drawWheel(); try { renderEntries(); } catch(e) {}
+    entries[+ev.target.dataset.i].weight = Math.max(0.1, parseFloat(ev.target.value) || 0.1);
+    drawWheel(); try { renderEntries(); } catch(e) {}
   }));
   tbody.querySelectorAll('.fw-input').forEach(inp => inp.addEventListener('input', ev => {
     const idx = +ev.target.dataset.i; const raw = (ev.target.value || '').toString().trim();
@@ -1265,35 +1307,63 @@ function refreshSelects() {
   const prev = sel.value;
   sel.innerHTML = entries.map((e, i) => `<option value="${i}">${escHtml(e.name)}</option>`).join('');
   if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+
+  const fsel = document.getElementById('fakeLandingPick'); if (!fsel) return;
+  const fprev = fsel.value;
+  fsel.innerHTML = entries.map((e, i) => `<option value="${i}">${escHtml(e.name)}</option>`).join('');
+  if ([...fsel.options].some(o => o.value === fprev)) fsel.value = fprev;
 }
 
 function renderEntries() {
   const list = document.getElementById('entriesList'); list.innerHTML = '';
   const showFake = showFakeWeightsChk ? showFakeWeightsChk.checked : false;
-  const displayWeighted = displayWeightedChk ? displayWeightedChk.checked : false;
   const useWeights = useWeightsChk ? useWeightsChk.checked : true;
+  const isSingle = entries.length <= 1;
+
   entries.forEach((e, i) => {
     const row = document.createElement('div'); row.className = 'entry-row';
-    let labelValue = showFake ? (e.fakeWeight !== undefined ? e.fakeWeight : 1) : displayWeighted ? (Number(e.weight) || 1) : 1;
+    let weightValue = showFake ? (e.fakeWeight !== undefined ? e.fakeWeight : 1) : (Number(e.weight) || 1);
     row.innerHTML = `
-      <div><input type="text" value="${escHtml(e.name)}" placeholder="${t('entries.placeholder')}" data-i="${i}" class="name-inp" ${!useWeights ? 'disabled' : ''}></div>
-      <div style="text-align:center"><span data-i="${i}">${escHtml(String(labelValue))}</span></div>
+      <div><input type="text" value="${escHtml(e.name)}" placeholder="${t('entries.placeholder')}" data-i="${i}" class="name-inp"></div>
+      <div><input type="number" value="${escHtml(String(weightValue))}" min="0.1" step="0.5" data-i="${i}" class="entry-weight-input" ${!useWeights ? 'disabled' : ''}></div>
       <input type="color" value="${e.color || COLORS[i % COLORS.length]}" data-i="${i}" class="color-inp" title="${t('color.pick')}" style="width:36px;height:28px;border-radius:6px;border:1px solid var(--border);padding:0;cursor:pointer;">
-      <button class="del-btn" data-i="${i}" title="${t('btn.remove')}">✕</button>
+      <button class="del-btn" data-i="${i}" title="${t('btn.remove')}" ${isSingle ? 'disabled' : ''}>✕</button>
     `;
     list.appendChild(row);
   });
+
   list.querySelectorAll('.name-inp').forEach(inp => inp.addEventListener('input', ev => {
     entries[+ev.target.dataset.i].name = ev.target.value; drawWheel(); refreshSelects();
     if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
   }));
+
+  list.querySelectorAll('.entry-weight-input').forEach(inp => inp.addEventListener('input', ev => {
+    const idx = +ev.target.dataset.i;
+    const val = Math.max(0.1, parseFloat(ev.target.value) || 0.1);
+    const isFakeMode = showFakeWeightsChk && showFakeWeightsChk.checked;
+    if (isFakeMode) {
+      entries[idx].fakeWeight = val;
+    } else {
+      entries[idx].weight = val;
+      if (displayWeightedChk && !displayWeightedChk.checked) {
+        displayWeightedChk.checked = true;
+        syncWeightToggles();
+      }
+    }
+    drawWheel();
+    if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
+  }));
+
   list.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', ev => {
+    if (entries.length <= 1) return;
     entries.splice(+ev.target.dataset.i, 1); renderEntries(); drawWheel(); refreshSelects();
     if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
   }));
   list.querySelectorAll('.color-inp').forEach(inp => inp.addEventListener('input', ev => {
     entries[+ev.target.dataset.i].color = ev.target.value; drawWheel();
   }));
+
+  const sb = document.getElementById('spinBtn'); if (sb) sb.disabled = spinning || entries.length <= 1;
 }
 
 function renderExcludeList() {
@@ -1313,7 +1383,7 @@ document.getElementById('addBtn').addEventListener('click', () => {
   if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
 });
 
-// ---- Draw wheel ----
+/* ---- Draw wheel ---- */
 function computeSliceAngles(overrideOptions) {
   const n = entries.length; if (n === 0) return { angles: [], cumulative: [] };
   const override = overrideOptions || {};
@@ -1323,7 +1393,9 @@ function computeSliceAngles(overrideOptions) {
   let angles = [];
   if (displayWeighted) {
     const useWeights = useWeightsChk ? useWeightsChk.checked : true;
-    let ws = showFake ? entries.map(e => { const v = e.fakeWeight !== undefined ? Number(e.fakeWeight) : 1; return (isFinite(v) && v > 0) ? v : 0; }) : entries.map(e => useWeights ? (Number(e.weight) || 0) : 1);
+    let ws = showFake
+      ? entries.map(e => { const v = e.fakeWeight !== undefined ? Number(e.fakeWeight) : 1; return (isFinite(v) && v > 0) ? v : 0; })
+      : entries.map(e => useWeights ? (Number(e.weight) || 0) : 1);
     const total = ws.reduce((s, w) => s + (isFinite(w) && w > 0 ? w : 0), 0) || n;
     angles = ws.map(w => (Math.PI * 2) * (w / total));
   } else {
@@ -1338,6 +1410,30 @@ function drawWheel(highlightIndex = -1) {
   const size = canvas.width, cx = size / 2, cy = size / 2, r = cx - 4;
   ctx.clearRect(0, 0, size, size);
   const n = entries.length; if (n === 0) return;
+
+  if (n === 1) {
+    const e = entries[0];
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = highlightIndex === 0 ? '#fff' : (e.color || COLORS[0]);
+    ctx.strokeStyle = '#0d0d0f'; ctx.lineWidth = 2;
+    ctx.fill(); ctx.stroke();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = highlightIndex === 0 ? '#0d0d0f' : '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4;
+    const name = e.name.length > 20 ? e.name.slice(0, 19) + '…' : e.name;
+    ctx.font = `700 20px 'DM Sans', sans-serif`;
+    ctx.fillText(name, cx, cy - 38);
+    ctx.restore();
+
+    ctx.beginPath(); ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+    ctx.fillStyle = '#0d0d0f'; ctx.fill(); ctx.strokeStyle = '#f0c040'; ctx.lineWidth = 3; ctx.stroke();
+    return;
+  }
+
   const { angles, cumulative } = computeSliceAngles();
   entries.forEach((e, i) => {
     const sliceAngle = angles[i] || ((Math.PI * 2) / n);
@@ -1358,112 +1454,182 @@ function drawWheel(highlightIndex = -1) {
   ctx.fillStyle = '#0d0d0f'; ctx.fill(); ctx.strokeStyle = '#f0c040'; ctx.lineWidth = 3; ctx.stroke();
 }
 
-// ---- Pick winner ----
+/* ---- Pick winner (respects cooldown, maxWins, exclude, force, weights) ---- */
 function pickWinner() {
   if (entries.length === 0) return 0;
+  if (entries.length === 1) return 0;
+
   const useForce = document.getElementById('useForce').checked;
   const useExclude = document.getElementById('useExclude').checked;
   const useWeights = document.getElementById('useWeights').checked;
+  const useCooldown = document.getElementById('useCooldown').checked;
+  const useMaxWins = document.getElementById('useMaxWins').checked;
+  const maxWins = parseInt(document.getElementById('maxWinsInput').value, 10) || 1;
   const forceIdx = parseInt(document.getElementById('forcePick').value, 10);
-  let excludedIdxs = entries.map((e, i) => e.excluded ? i : -1).filter(i => i >= 0);
+  const excludedIdxs = entries.map((e, i) => e.excluded ? i : -1).filter(i => i >= 0);
+
   if (useForce && entries[forceIdx] !== undefined) return forceIdx;
-  let pool = entries.map((e, i) => ({ i, w: useWeights ? e.weight : 1 }));
+
+  let pool = entries.map((e, i) => ({ i, w: useWeights ? e.weight : 1, name: e.name }));
   if (useExclude) pool = pool.filter(p => !excludedIdxs.includes(p.i));
-  if (pool.length === 0) pool = entries.map((e, i) => ({ i, w: 1 }));
+  if (useCooldown) pool = pool.filter(p => !(cooldownMap[p.name] > 0));
+  if (useMaxWins) pool = pool.filter(p => (sessionWins[p.name] || 0) < maxWins);
+  if (pool.length === 0) pool = entries.map((e, i) => ({ i, w: 1, name: e.name }));
+
   const totalW = pool.reduce((s, p) => s + p.w, 0);
   let rand = Math.random() * totalW;
   for (const p of pool) { rand -= p.w; if (rand <= 0) return p.i; }
   return pool[pool.length - 1].i;
 }
 
-// ---- Nobody won gag ----
+/* post-win bookkeeping */
+function recordWin(name) {
+  sessionWins[name] = (sessionWins[name] || 0) + 1;
+  const useCooldown = document.getElementById('useCooldown').checked;
+  if (useCooldown) {
+    const cd = parseInt(document.getElementById('cooldownSpins').value, 10) || 1;
+    cooldownMap[name] = cd;
+  }
+  totalSpinsSoFar++;
+  for (const k in cooldownMap) {
+    if (k !== name) cooldownMap[k] = Math.max(0, (cooldownMap[k] || 0) - 1);
+  }
+}
+
+/* ---- nobody won gag ---- */
 function triggerNobodyWon() {
-  const canvas = document.getElementById('wheelCanvas');
   const banner = document.getElementById('resultBanner');
   const mystery = document.getElementById('mysteryMark');
   spinning = true; document.getElementById('spinBtn').disabled = true; stopTicking();
   if (banner) { banner.textContent = 'Nobody won :D'; banner.className = 'result-banner spinning'; }
   if (mystery) mystery.style.opacity = '0';
-  if (canvas) {
-    canvas.style.willChange = 'transform';
-    const accelDuration = 800, maxDeg = 1080, startTs = performance.now();
-    function accelFrame(now) {
-      const t = Math.min((now - startTs) / accelDuration, 1), eased = t * t;
-      canvas.style.transform = `rotate(${eased * maxDeg}deg)`;
-      if (t < 1) requestAnimationFrame(accelFrame);
-      else {
-        if (mystery) mystery.style.opacity = '1';
-        canvas.classList.add('fly-right');
-      }
+  canvas.style.willChange = 'transform';
+  const accelDuration = 800, maxDeg = 1080, startTs = performance.now();
+  function accelFrame(now) {
+    const tt = Math.min((now - startTs) / accelDuration, 1), eased = tt * tt;
+    canvas.style.transform = `rotate(${eased * maxDeg}deg)`;
+    if (tt < 1) requestAnimationFrame(accelFrame);
+    else {
+      if (mystery) mystery.style.opacity = '1';
+      canvas.classList.add('fly-right');
     }
-    requestAnimationFrame(accelFrame);
-    const onFlyEnd = (ev) => {
-      if (ev.animationName && ev.animationName.indexOf('flyRight') === -1) return;
-      canvas.removeEventListener('animationend', onFlyEnd);
-      canvas.classList.remove('fly-right'); canvas.style.transition = 'none';
-      canvas.style.transform = 'translateX(-120vw) rotate(-360deg)'; void canvas.offsetWidth;
-      canvas.classList.add('return-in');
-      const onReturn = (ev2) => {
-        if (ev2.animationName && ev2.animationName.indexOf('returnIn') === -1) return;
-        canvas.removeEventListener('animationend', onReturn);
-        canvas.classList.remove('return-in'); canvas.style.transform = ''; canvas.style.transition = '';
-        if (mystery) mystery.style.opacity = '0';
-        if (banner) { banner.textContent = 'Nobody won :D'; banner.className = 'result-banner win'; }
-        spinning = false; document.getElementById('spinBtn').disabled = false;
-      };
-      canvas.addEventListener('animationend', onReturn);
-    };
-    canvas.addEventListener('animationend', onFlyEnd);
-  } else {
-    setTimeout(() => { spinning = false; document.getElementById('spinBtn').disabled = false; }, 1200);
   }
+  requestAnimationFrame(accelFrame);
+  canvas.addEventListener('animationend', function onFlyEnd(ev) {
+    if (ev.animationName && ev.animationName.indexOf('flyRight') === -1) return;
+    canvas.removeEventListener('animationend', onFlyEnd);
+    canvas.classList.remove('fly-right'); canvas.style.transition = 'none';
+    canvas.style.transform = 'translateX(-120vw) rotate(-360deg)'; void canvas.offsetWidth;
+    canvas.classList.add('return-in');
+    canvas.addEventListener('animationend', function onReturn(ev2) {
+      if (ev2.animationName && ev2.animationName.indexOf('returnIn') === -1) return;
+      canvas.removeEventListener('animationend', onReturn);
+      canvas.classList.remove('return-in'); canvas.style.transform = ''; canvas.style.transition = '';
+      if (mystery) mystery.style.opacity = '0';
+      if (banner) { banner.textContent = 'Nobody won :D'; banner.className = 'result-banner win'; }
+      spinning = false; document.getElementById('spinBtn').disabled = false;
+    });
+  });
 }
 
-// ---- Spin ----
-document.getElementById('spinBtn').addEventListener('click', () => {
-  if (spinning || entries.length < 2) return;
-  spinning = true; document.getElementById('spinBtn').disabled = true;
+/* ---- helper: spin wheel to a target index, return promise ---- */
+function animateWheelToIndex(targetIdx, speedSec) {
+  return new Promise(resolve => {
+    const n = entries.length;
+    const { angles, cumulative } = computeSliceAngles();
+    const sliceAngle = angles[targetIdx] || ((Math.PI * 2) / n);
+    const jitter = (Math.random() - 0.5) * sliceAngle * 0.55;
+    const rawTarget = -Math.PI / 2 - currentAngle - (cumulative[targetIdx] + sliceAngle / 2) + jitter;
+    let mod = rawTarget % (Math.PI * 2); if (mod <= 0) mod += Math.PI * 2;
+    const totalDelta = mod + (5 + Math.floor(Math.random() * 4)) * Math.PI * 2;
+    const startAngle = currentAngle;
+    const duration = Math.round(speedSec * 1000 + (Math.random() * 300 - 150));
+    const startTime = performance.now();
+    function ease(t) { return 1 - Math.pow(1 - t, 3); }
+    function frame(now) {
+      const p = Math.min((now - startTime) / duration, 1);
+      currentAngle = startAngle + totalDelta * ease(p);
+      if (p < 1) try { updateTickForAngle(currentAngle); } catch(e) {}
+      drawWheel(p >= 1 ? targetIdx : -1);
+      if (p < 1) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+/* ---- Main spin handler ---- */
+document.getElementById('spinBtn').addEventListener('click', async () => {
+  if (spinning || entries.length <= 1) return;
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
   document.getElementById('resultBanner').textContent = t('home.spinning');
   document.getElementById('resultBanner').className = 'result-banner spinning';
   try { startTicking(); } catch(e) {}
 
   const useExclude = document.getElementById('useExclude').checked;
-  if (useExclude && entries.filter(e => e.excluded).length === entries.length) { triggerNobodyWon(); return; }
-
-  const winnerIdx = pickWinner();
-  lastWinnerIdx = winnerIdx;
-  const n = entries.length;
-  const { angles, cumulative } = computeSliceAngles();
-  const sliceAngleForWinner = angles[winnerIdx] || ((Math.PI * 2) / n);
-  const jitter = (Math.random() - 0.5) * sliceAngleForWinner * 0.55;
-  const rawTarget = -Math.PI / 2 - currentAngle - (cumulative[winnerIdx] + sliceAngleForWinner / 2) + jitter;
-  let mod = rawTarget % (Math.PI * 2); if (mod <= 0) mod += Math.PI * 2;
-  const totalDelta = mod + (5 + Math.floor(Math.random() * 4)) * Math.PI * 2;
-  const startAngle = currentAngle;
-  const spinSec = Math.max(0.2, Number(settings.spinTime) || 4);
-  const duration = Math.round(spinSec * 1000 + (Math.random() * 300 - 150));
-  const startTime = performance.now();
-  function ease(t) { return 1 - Math.pow(1 - t, 3); }
-
-  function frame(now) {
-    const p = Math.min((now - startTime) / duration, 1);
-    currentAngle = startAngle + totalDelta * ease(p);
-    if (p < 1) try { updateTickForAngle(currentAngle); } catch(e) {}
-    drawWheel(p >= 1 ? winnerIdx : -1);
-    if (p < 1) { requestAnimationFrame(frame); return; }
-    spinning = false; document.getElementById('spinBtn').disabled = false;
-    stopTicking();
-    const name = entries[winnerIdx].name;
-    document.getElementById('resultBanner').textContent = t('home.winner').replace('{name}', name);
-    document.getElementById('resultBanner').className = 'result-banner win';
-    addHistory(name);
-    try { showWinner(name); } catch(e) {}
-    // auto-remove is now deferred to hideWinner() (Awesome / Spin again buttons)
+  if (useExclude && entries.filter(e => e.excluded).length === entries.length) {
+    triggerNobodyWon(); return;
   }
-  requestAnimationFrame(frame);
+
+  const useCooldown = document.getElementById('useCooldown').checked;
+  const useMaxWins = document.getElementById('useMaxWins').checked;
+  const maxWins = parseInt(document.getElementById('maxWinsInput').value, 10) || 1;
+  const anyEligible = entries.some(e => {
+    if (useCooldown && cooldownMap[e.name] > 0) return false;
+    if (useMaxWins && (sessionWins[e.name] || 0) >= maxWins) return false;
+    return true;
+  });
+  if (!anyEligible) { triggerNobodyWon(); return; }
+
+  const spinSec = Math.max(0.2, Number(settings.spinTime) || 4);
+  const useFakeLanding = document.getElementById('useFakeLanding').checked;
+  const useDelayReveal = document.getElementById('useDelayReveal').checked;
+  const delaySecs = parseFloat(document.getElementById('delayRevealSecs').value) || 2;
+
+  const realWinnerIdx = pickWinner();
+  lastWinnerIdx = realWinnerIdx;
+
+  if (useFakeLanding) {
+    const fakeIdx = parseInt(document.getElementById('fakeLandingPick').value, 10);
+    const validFake = fakeIdx !== realWinnerIdx && entries[fakeIdx];
+    const spinToIdx = validFake ? fakeIdx : realWinnerIdx;
+    await animateWheelToIndex(spinToIdx, spinSec);
+    stopTicking();
+    drawWheel(spinToIdx);
+
+    if (validFake) {
+      document.getElementById('resultBanner').textContent = '...';
+      document.getElementById('resultBanner').className = 'result-banner';
+      await new Promise(r => setTimeout(r, 1500));
+      try { startTicking(); } catch(e) {}
+      await animateWheelToIndex(realWinnerIdx, 1.5);
+      stopTicking();
+    }
+  } else {
+    await animateWheelToIndex(realWinnerIdx, spinSec);
+    stopTicking();
+  }
+
+  drawWheel(realWinnerIdx);
+  const name = entries[realWinnerIdx].name;
+
+  if (useDelayReveal) {
+    document.getElementById('resultBanner').textContent = '🥁 ...';
+    document.getElementById('resultBanner').className = 'result-banner spinning';
+    drawWheel(-1);
+    await new Promise(r => setTimeout(r, delaySecs * 1000));
+    drawWheel(realWinnerIdx);
+  }
+
+  document.getElementById('resultBanner').textContent = t('home.winner').replace('{name}', name);
+  document.getElementById('resultBanner').className = 'result-banner win';
+  addHistory(name); recordWin(name);
+  spinning = false; document.getElementById('spinBtn').disabled = false;
+  try { showWinner(name); } catch(e) {}
 });
 
-// ---- History ----
+/* ---- History ---- */
 function addHistory(name) {
   const now = new Date();
   const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1472,7 +1638,7 @@ function addHistory(name) {
   list.innerHTML = spinHistory.map(h => `<li><span class="winner">${escHtml(h.name)}</span><span>${h.time}</span></li>`).join('');
 }
 
-// ---- Confetti ----
+/* ---- Confetti ---- */
 const confettiCanvas = document.getElementById('confettiCanvas');
 const confettiCtx = confettiCanvas.getContext('2d');
 let confettiParticles = [], confettiRunning = false;
@@ -1487,7 +1653,12 @@ window.addEventListener('resize', resizeConfetti); resizeConfetti();
 function spawnConfetti() {
   const colors = ['#f0c040','#e05a2b','#4a7fe8','#2fbf8a','#c44b8a','#06b6d4','#84cc16'];
   confettiParticles = [];
-  for (let i = 0; i < 120; i++) confettiParticles.push({ x: Math.random() * window.innerWidth, y: -10 - Math.random() * 200, size: 6 + Math.random() * 10, velX: -60 + Math.random() * 120, velY: 40 + Math.random() * 160, rot: Math.random() * 360, rotVel: -120 + Math.random() * 240, color: colors[Math.floor(Math.random() * colors.length)] });
+  for (let i = 0; i < 120; i++) confettiParticles.push({
+    x: Math.random() * window.innerWidth, y: -10 - Math.random() * 200,
+    size: 6 + Math.random() * 10, velX: -60 + Math.random() * 120, velY: 40 + Math.random() * 160,
+    rot: Math.random() * 360, rotVel: -120 + Math.random() * 240,
+    color: colors[Math.floor(Math.random() * colors.length)]
+  });
 }
 let lastCTS = 0;
 function runConfetti(duration = 3000) {
@@ -1495,7 +1666,12 @@ function runConfetti(duration = 3000) {
   function loop(now) {
     const dt = Math.min(40, now - lastCTS) / 1000; lastCTS = now;
     confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-    confettiParticles.forEach(p => { p.x += p.velX * dt; p.y += p.velY * dt; p.velY += 300 * dt; p.rot += p.rotVel * dt; confettiCtx.save(); confettiCtx.translate(p.x, p.y); confettiCtx.rotate(p.rot * Math.PI / 180); confettiCtx.fillStyle = p.color; confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6); confettiCtx.restore(); });
+    confettiParticles.forEach(p => {
+      p.x += p.velX * dt; p.y += p.velY * dt; p.velY += 300 * dt; p.rot += p.rotVel * dt;
+      confettiCtx.save(); confettiCtx.translate(p.x, p.y); confettiCtx.rotate(p.rot * Math.PI / 180);
+      confettiCtx.fillStyle = p.color; confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+      confettiCtx.restore();
+    });
     confettiParticles = confettiParticles.filter(p => p.y < window.innerHeight + 200 && p.x > -200 && p.x < window.innerWidth + 200);
     if (now - (lastCTS - dt * 1000) < duration && confettiParticles.length > 0) requestAnimationFrame(loop);
     else { confettiRunning = false; confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); }
@@ -1503,16 +1679,13 @@ function runConfetti(duration = 3000) {
   requestAnimationFrame(loop);
 }
 
-// ---- Winner popup ----
+/* ---- Winner popup ---- */
 function showWinner(name) {
   const wb = document.getElementById('winnerBackdrop'), wn = document.getElementById('winnerName');
-  // title
   const wtitle = document.getElementById('winnerTitle');
   if (wtitle) wtitle.textContent = (settings.popupTitle || 'We have a winner!').replace('{name}', name);
-  // subtitle
   const wsub = document.getElementById('winnerSubtitle');
-  if (wsub) { const sub = (settings.popupSubtitle || '').replace('{name}', name); wsub.textContent = sub || ' '; }
-  // name text (big yellow)
+  if (wsub) { const sub = (settings.popupSubtitle || '').replace('{name}', name); wsub.textContent = sub || ' '; }
   if (wn) wn.textContent = (settings.popupNameText || '{name}').replace('{name}', name);
   if (wb) {
     const popup = wb.querySelector('.winner-popup'); if (popup) popup.classList.remove('closing');
@@ -1525,26 +1698,19 @@ function showWinner(name) {
 function hideWinner() {
   const wb = document.getElementById('winnerBackdrop'); if (!wb) return;
   const popup = wb.querySelector('.winner-popup');
-  if (popup) {
-    popup.classList.add('closing');
-    const onEnd = () => {
-      popup.removeEventListener('animationend', onEnd);
-      wb.classList.remove('show'); wb.style.display = 'none'; popup.classList.remove('closing');
-      // auto-remove with animation after popup closes
-      if (settings.autoRemoveWinner && lastWinnerIdx >= 0) {
-        try { animateRemoveEntry(lastWinnerIdx); } catch(e) {}
-        lastWinnerIdx = -1;
-      }
-    };
-    popup.addEventListener('animationend', onEnd);
-    setTimeout(() => { if (wb.classList.contains('show')) { wb.classList.remove('show'); wb.style.display = 'none'; popup.classList.remove('closing'); } }, 600);
-  } else {
+  const doClose = () => {
     wb.classList.remove('show'); wb.style.display = 'none';
+    if (popup) popup.classList.remove('closing');
     if (settings.autoRemoveWinner && lastWinnerIdx >= 0) {
       try { animateRemoveEntry(lastWinnerIdx); } catch(e) {}
       lastWinnerIdx = -1;
     }
-  }
+  };
+  if (popup) {
+    popup.classList.add('closing');
+    popup.addEventListener('animationend', function h() { popup.removeEventListener('animationend', h); doClose(); }, { once: true });
+    setTimeout(() => { if (wb.classList.contains('show')) doClose(); }, 600);
+  } else doClose();
   confettiRunning = false; confettiParticles = [];
   if (confettiCtx) confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
   try { drawWheel(); } catch(e) {}
@@ -1557,10 +1723,7 @@ function animateRemoveEntry(idx) {
   const row = rows[idx];
   if (!row) { doRemoveEntry(idx); return; }
   row.classList.add('removing');
-  row.addEventListener('animationend', () => {
-    doRemoveEntry(idx);
-  }, { once: true });
-  // safety fallback
+  row.addEventListener('animationend', () => doRemoveEntry(idx), { once: true });
   setTimeout(() => doRemoveEntry(idx), 600);
 }
 
@@ -1568,8 +1731,7 @@ const _removeGuard = new Set();
 function doRemoveEntry(idx) {
   const key = 'r' + idx + '_' + (entries[idx] ? entries[idx].name : '');
   if (_removeGuard.has(key)) return;
-  _removeGuard.add(key);
-  setTimeout(() => _removeGuard.delete(key), 800);
+  _removeGuard.add(key); setTimeout(() => _removeGuard.delete(key), 800);
   if (idx >= 0 && idx < entries.length) entries.splice(idx, 1);
   renderEntries(); drawWheel(); refreshSelects();
   if (document.getElementById('rigModal').classList.contains('open')) renderWeightTable();
@@ -1586,35 +1748,33 @@ document.getElementById('winnerSpinAgain').addEventListener('click', () => {
 
 document.getElementById('winnerRemoveBtn').addEventListener('click', () => {
   const savedIdx = lastWinnerIdx;
-  lastWinnerIdx = -1; // prevent auto-remove double-firing
+  lastWinnerIdx = -1;
   const wb = document.getElementById('winnerBackdrop');
   const popup = wb && wb.querySelector('.winner-popup');
+  const doClose = () => {
+    if (wb) { wb.classList.remove('show'); wb.style.display = 'none'; }
+    if (popup) popup.classList.remove('closing');
+    if (savedIdx >= 0) try { animateRemoveEntry(savedIdx); } catch(e) {}
+  };
   if (popup) {
     popup.classList.add('closing');
-    const onEnd = () => {
-      popup.removeEventListener('animationend', onEnd);
-      wb.classList.remove('show'); wb.style.display = 'none'; popup.classList.remove('closing');
-      if (savedIdx >= 0) { try { animateRemoveEntry(savedIdx); } catch(e) {} }
-    };
-    popup.addEventListener('animationend', onEnd);
-    setTimeout(() => { if (wb && wb.classList.contains('show')) { wb.classList.remove('show'); wb.style.display = 'none'; popup.classList.remove('closing'); if (savedIdx >= 0) try { animateRemoveEntry(savedIdx); } catch(e) {} } }, 600);
-  } else {
-    if (wb) { wb.classList.remove('show'); wb.style.display = 'none'; }
-    if (savedIdx >= 0) try { animateRemoveEntry(savedIdx); } catch(e) {}
-  }
+    popup.addEventListener('animationend', function h() { popup.removeEventListener('animationend', h); doClose(); }, { once: true });
+    setTimeout(() => { if (wb && wb.classList.contains('show')) doClose(); }, 600);
+  } else doClose();
   confettiRunning = false; confettiParticles = [];
   if (confettiCtx) confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
   try { drawWheel(); } catch(e) {}
 });
 
-// ---- History controls (rigging panel) ----
+/* ---- History controls ---- */
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('clearHistoryBtn'); if (!btn) return;
   btn.addEventListener('click', () => {
     if (!confirm(t('confirm.clearHistory'))) return;
-    spinHistory = [];
+    spinHistory = []; sessionWins = {}; cooldownMap = {};
     const list = document.getElementById('historyList');
     list.innerHTML = `<li style="color:var(--muted);font-style:italic;font-size:0.75rem;background:none;">${t('history.noSpins')}</li>`;
+    showToast({ title: 'History cleared', subtitle: 'Win counts & cooldowns reset too', icon: '🗑️', variant: 'warning', duration: 3000 });
   });
   const addFake = document.getElementById('addFakeBtn'), fakeName = document.getElementById('fakeName'), fakeTime = document.getElementById('fakeTime');
   if (fakeTime) { const d = new Date(); fakeTime.value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
@@ -1629,12 +1789,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ---- Init ----
+/* ---- Init ---- */
 renderEntries(); refreshSelects(); drawWheel();
-document.getElementById('saveHomeBtn').addEventListener('click', saveHome);
-document.getElementById('loadHomeBtn').addEventListener('click', loadHome);
-document.getElementById('saveRigBtn').addEventListener('click', saveRig);
-document.getElementById('loadRigBtn').addEventListener('click', promptLoadRig);
 </script>
 </body>
 </html>
